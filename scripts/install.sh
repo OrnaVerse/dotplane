@@ -285,20 +285,48 @@ chmod 600 "${DOTPLANE_ROOT}/.env"
 # ── 12. Run database migrations ────────────────────────────────────────────────
 log "Running database migrations..."
 cd "$DOTPLANE_ROOT/packages/platform"
-"$NODE_BIN" --import tsx src/server/db/migrate.ts 2>/dev/null \
-  || "$NODE_BIN" dist/server/db/migrate.js 2>/dev/null \
-  || warn "Migration step skipped — run 'pnpm db:migrate' manually if needed"
+export DOTPLANE_ENV_PATH="${DOTPLANE_ROOT}/.env"
+export DB_PATH="${DATA_DIR}/dotplane.db"
+if "$NODE_BIN" dist/server/db/migrate.js 2>/dev/null \
+  || "$NODE_BIN" --import tsx src/server/db/migrate.ts 2>/dev/null \
+  || "$NODE_BIN" --input-type=module -e "import('./dist/server/db/migrate.js').then((m) => { m.runMigrations(); console.log('Migrations complete') })"; then
+  ok "Database migrations complete"
+else
+  warn "Migration step failed — run manually from ${DOTPLANE_ROOT}/packages/platform"
+fi
 ok "SQLite database ready at ${DATA_DIR}/dotplane.db"
 
 # ── 13. Set admin password ─────────────────────────────────────────────────────
-echo ""
-read -s -p "Set admin password (min 12 chars): " ADMIN_PASS
-echo ""
-[[ ${#ADMIN_PASS} -lt 12 ]] && fail "Password too short (minimum 12 characters)"
+prompt_admin_password() {
+  if [[ -n "${DOTPLANE_ADMIN_PASSWORD:-}" ]]; then
+    ADMIN_PASS="$DOTPLANE_ADMIN_PASSWORD"
+    ok "Using admin password from DOTPLANE_ADMIN_PASSWORD"
+    return
+  fi
+
+  echo ""
+  if [[ -t 0 ]]; then
+    read -r -s -p "Set admin password (min 12 chars): " ADMIN_PASS
+    echo ""
+  elif [[ -r /dev/tty ]]; then
+    read -r -s -p "Set admin password (min 12 chars): " ADMIN_PASS < /dev/tty
+    echo "" > /dev/tty
+  else
+    ADMIN_PASS="$(openssl rand -base64 24)"
+    GENERATED_ADMIN_PASS=1
+    warn "Piped install with no TTY — generated a random admin password (shown in summary below)"
+  fi
+
+  [[ ${#ADMIN_PASS} -lt 12 ]] && fail "Password too short (minimum 12 characters)"
+}
+
+GENERATED_ADMIN_PASS=0
+prompt_admin_password
 
 CLI="${DOTPLANE_ROOT}/packages/platform/dist/server/cli.js"
 if [[ -f "$CLI" ]]; then
-  "$NODE_BIN" "$CLI" set-password admin "$ADMIN_PASS"
+  DOTPLANE_ENV_PATH="${DOTPLANE_ROOT}/.env" DB_PATH="${DATA_DIR}/dotplane.db" \
+    "$NODE_BIN" "$CLI" set-password admin "$ADMIN_PASS"
 else
   warn "Platform CLI not found — set admin password via UI on first login"
 fi
@@ -383,7 +411,11 @@ echo -e "${GREEN}║           Dotplane Installed Successfully            ║${N
 echo -e "${GREEN}╠══════════════════════════════════════════════════════╣${NC}"
 echo -e "${GREEN}║${NC}  Panel URL  : https://${SERVER_IP}/${URL_KEY}"
 echo -e "${GREEN}║${NC}  Username   : admin"
-echo -e "${GREEN}║${NC}  Password   : (the one you just set)"
+if [[ "${GENERATED_ADMIN_PASS:-0}" == "1" ]]; then
+  echo -e "${GREEN}║${NC}  Password   : ${ADMIN_PASS}"
+else
+  echo -e "${GREEN}║${NC}  Password   : (the one you just set)"
+fi
 echo -e "${GREEN}║${NC}  Database   : ${DATA_DIR}/dotplane.db (SQLite)"
 echo -e "${GREEN}║${NC}  Backups    : ${BACKUP_DIR}"
 echo -e "${GREEN}║${NC}"

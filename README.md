@@ -36,14 +36,16 @@ Push a version tag to trigger the release workflow, then on your Linux server:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/OrnaVerse/dotplane/main/scripts/bootstrap-install.sh | \
-  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane bash
+  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane DOTPLANE_ADMIN_PASSWORD='your-secure-password' bash
 ```
+
+`DOTPLANE_ADMIN_PASSWORD` is required when piping through `curl` (no TTY). Without it, the installer generates a random password and prints it in the final summary.
 
 Pin a specific version:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/OrnaVerse/dotplane/main/scripts/bootstrap-install.sh | \
-  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane DOTPLANE_VERSION=v1.0.0 bash
+  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane DOTPLANE_VERSION=v0.1.9 DOTPLANE_ADMIN_PASSWORD='your-secure-password' bash
 ```
 
 The bootstrap script downloads the pre-built release tarball, installs system dependencies (Node, Caddy, .NET, UFW, fail2ban), generates secrets, and starts services. Native modules compile on the target server during production dependency install.
@@ -72,6 +74,31 @@ tar -xzf /tmp/dotplane-v1.0.0-linux-amd64.tar.gz -C /tmp
 sudo bash /tmp/dotplane-v1.0.0-linux-amd64/scripts/install.sh \
   --from-release /tmp/dotplane-v1.0.0-linux-amd64
 ```
+
+### Reinstall
+
+Uninstall the current install, then run the bootstrap command again:
+
+```bash
+# From a git checkout on the server:
+sudo bash scripts/uninstall.sh --purge-data --remove-caddy
+
+# Or download the uninstall script directly:
+curl -fsSL https://raw.githubusercontent.com/OrnaVerse/dotplane/main/scripts/uninstall.sh | sudo bash -s -- --purge-data --remove-caddy
+```
+
+Then reinstall with the one-line bootstrap command above.
+
+`uninstall.sh` options:
+
+| Flag | Effect |
+|------|--------|
+| *(default)* | Stops services and removes `/opt/dotplane` (including SQLite DB) — keeps `/var/dotplane`, Caddy, Node, .NET |
+| `--purge-data` | Also deletes artifacts, instances, and logs under `/var/dotplane` |
+| `--remove-caddy` | Removes Caddy binary, systemd unit, and config |
+| `--remove-system-deps` | Also removes fnm/Node and .NET SDK installed by Dotplane |
+
+UFW and fail2ban are left unchanged so SSH access is not disrupted.
 
 ---
 
@@ -117,6 +144,12 @@ Server-side admin:
 ```bash
 node /opt/dotplane/packages/platform/dist/server/cli.js set-password admin 'your-password'
 node /opt/dotplane/packages/platform/dist/server/cli.js show-access
+```
+
+If a piped install stopped before showing credentials:
+
+```bash
+sudo DOTPLANE_ADMIN_PASSWORD='your-secure-password' bash /opt/dotplane/scripts/finish-install.sh
 ```
 
 See `docs/security.md` for hardening and secret rotation.

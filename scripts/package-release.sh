@@ -51,8 +51,9 @@ cp -r packages/shared/dist "$STAGING/packages/shared/"
 
 # Install scripts & systemd
 mkdir -p "$STAGING/scripts" "$STAGING/systemd"
-cp scripts/install.sh scripts/install-agent.sh scripts/install-fnm.sh scripts/generate-certs.sh \
-   scripts/bootstrap-install.sh scripts/dotplane-agent.sudoers "$STAGING/scripts/"
+cp scripts/install.sh scripts/finish-install.sh scripts/uninstall.sh scripts/install-agent.sh \
+   scripts/install-fnm.sh scripts/generate-certs.sh scripts/bootstrap-install.sh \
+   scripts/dotplane-agent.sudoers "$STAGING/scripts/"
 chmod +x "$STAGING/scripts/"*.sh
 cp systemd/dotnet-app@.service "$STAGING/systemd/"
 

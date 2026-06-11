@@ -1,7 +1,15 @@
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
 import { db } from './index.js'
 import { settings } from './schema.js'
 import { eq } from 'drizzle-orm'
+
+function isDirectExecution(): boolean {
+  const entry = process.argv[1]
+  if (!entry) return false
+  return path.resolve(entry) === fileURLToPath(import.meta.url)
+}
 
 export function runMigrations(): void {
   migrate(db, { migrationsFolder: './drizzle' })
@@ -28,7 +36,7 @@ function seedDefaults(): void {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]?.replace(/\\/g, '/')}`) {
+if (isDirectExecution()) {
   runMigrations()
   console.log('Migrations complete')
 }

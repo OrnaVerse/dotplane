@@ -51,6 +51,8 @@ require_file "pnpm-lock.yaml"
 require_file "packages/platform/package.json"
 require_file "packages/platform/dist/server/index.js"
 require_file "packages/platform/dist/server/cli.js"
+require_file "packages/platform/dist/server/db/migrate.js"
+require_file "packages/platform/drizzle/meta/_journal.json"
 
 # Agent runtime
 require_file "packages/agent/package.json"
