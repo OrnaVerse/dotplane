@@ -1,0 +1,86 @@
+# Azure Pipelines — build .NET app and sync to Dotplane.
+#
+# Copy to your app repo: azure-pipelines.yml
+#
+# Required pipeline variables (Library → Variable groups):
+#   dotplaneUrl           — https://platform.example.com/ov_yourkey
+#   dotplaneDeployToken   — deploy token (secret)
+
+trigger:
+  tags:
+    include:
+      - v*
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  dotnetVersion: '8.0.x'
+  appId: ornaverse
+  csprojPath: src/YourApp/YourApp.csproj
+
+stages:
+  - stage: Build
+    jobs:
+      - job: BuildAndPublish
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              packageType: sdk
+              version: $(dotnetVersion)
+
+          - script: |
+              dotnet publish $(csprojPath) \
+                -c Release \
+                -r linux-x64 \
+                --self-contained false \
+                -o $(Build.ArtifactStagingDirectory)/publish
+            displayName: Publish .NET app
+
+          - task: ArchiveFiles@2
+            inputs:
+              rootFolderOrFile: $(Build.ArtifactStagingDirectory)/publish
+              archiveType: zip
+              archiveFile: $(Build.ArtifactStagingDirectory)/app.zip
+
+          - publish: $(Build.ArtifactStagingDirectory)/app.zip
+            artifact: app
+
+          - script: |
+              curl -fsSL -X POST \
+                -H "Authorization: Bearer $(dotplaneDeployToken)" \
+                -H "Content-Type: application/json" \
+                -d "{\"appId\":\"$(appId)\",\"version\":\"$(Build.SourceBranchName)\"}" \
+                "$(dotplaneUrl)/api/releases/sync"
+            displayName: Sync release to Dotplane
+            env:
+              dotplaneDeployToken: $(dotplaneDeployToken)
+              dotplaneUrl: $(dotplaneUrl)
+
+  - stage: Deploy
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - deployment: DeployAll
+        environment: production
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: none
+                - task: NodeTool@0
+                  inputs:
+                    versionSpec: '20.x'
+                - script: |
+                    npm install -g @dotplane/cli
+                    dotplane-remote login \
+                      --url "$(dotplaneBaseUrl)" \
+                      --url-key "$(dotplaneUrlKey)" \
+                      --username "$(dotplaneUser)" \
+                      --password "$(dotplanePassword)"
+                    dotplane-remote deploy-all \
+                      --app "$(appId)" \
+                      --version "$(Build.SourceBranchName)"
+                  displayName: Deploy all instances via dotplane-remote
+                  env:
+                    dotplanePassword: $(dotplanePassword)

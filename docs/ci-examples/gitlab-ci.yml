@@ -1,0 +1,65 @@
+# GitLab CI — build, release artifact, notify Dotplane.
+#
+# Copy to your app repo: .gitlab-ci.yml (merge with existing)
+#
+# Required CI/CD variables (Settings → CI/CD → Variables):
+#   DOTPLANE_URL            — https://platform.example.com/ov_yourkey
+#   DOTPLANE_DEPLOY_TOKEN   — deploy token (masked)
+#   DOTPLANE_BASE_URL       — https://platform.example.com (for CLI, optional)
+#   DOTPLANE_URL_KEY        — ov_yourkey (for CLI, optional)
+#   DOTPLANE_USER           — CI service account (optional)
+#   DOTPLANE_PASSWORD       — CI service account password (optional, masked)
+
+stages:
+  - build
+  - release
+  - deploy
+
+variables:
+  DOTNET_VERSION: '8.0'
+  APP_ID: ornaverse
+  CSPROJ: src/YourApp/YourApp.csproj
+
+build:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  script:
+    - dotnet publish $CSPROJ -c Release -r linux-x64 --self-contained false -o ./publish
+    - cd publish && zip -r ../app.zip . && cd ..
+  artifacts:
+    paths:
+      - app.zip
+    expire_in: 1 week
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v/
+
+release:
+  stage: release
+  image: curlimages/curl:latest
+  needs: [build]
+  script:
+    - |
+      curl -fsSL -X POST \
+        -H "Authorization: Bearer ${DOTPLANE_DEPLOY_TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d "{\"appId\":\"${APP_ID}\",\"version\":\"${CI_COMMIT_TAG}\"}" \
+        "${DOTPLANE_URL}/api/releases/sync"
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v/
+
+deploy_all:
+  stage: deploy
+  image: node:20
+  needs: [release]
+  when: manual
+  script:
+    - npm install -g @dotplane/cli
+    - |
+      dotplane-remote login \
+        --url "${DOTPLANE_BASE_URL}" \
+        --url-key "${DOTPLANE_URL_KEY}" \
+        --username "${DOTPLANE_USER}" \
+        --password "${DOTPLANE_PASSWORD}"
+    - dotplane-remote deploy-all --app "${APP_ID}" --version "${CI_COMMIT_TAG}"
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v/

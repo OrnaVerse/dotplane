@@ -1,0 +1,76 @@
+# Build .NET app, publish release artifact, and notify Dotplane.
+#
+# Copy to your app repo: .github/workflows/dotplane-release.yml
+#
+# Required secrets:
+#   DOTPLANE_URL        — https://platform.example.com/ov_yourkey
+#   DOTPLANE_DEPLOY_TOKEN — deploy token from Platform Settings
+
+name: Build and Release to Dotplane
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  APP_ID: ornaverse
+  CSPROJ: src/YourApp/YourApp.csproj
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Publish
+        run: |
+          dotnet publish ${{ env.CSPROJ }} \
+            -c Release \
+            -r linux-x64 \
+            --self-contained false \
+            -p:PublishSingleFile=false \
+            -o ./publish
+
+      - name: Create artifact zip
+        run: |
+          cd publish && zip -r ../app.zip . && cd ..
+          echo "ARTIFACT_SIZE=$(du -b app.zip | cut -f1)" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sync release to Dotplane
+        if: success()
+        run: |
+          curl -fsSL -X POST \
+            -H "Authorization: Bearer ${{ secrets.DOTPLANE_DEPLOY_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"appId\":\"${{ env.APP_ID }}\",\"version\":\"${{ github.ref_name }}\"}" \
+            "${{ secrets.DOTPLANE_URL }}/api/releases/sync"
+
+      - name: Deploy to all instances (optional)
+        if: success() && vars.AUTO_DEPLOY == 'true'
+        run: |
+          npm install -g @dotplane/cli 2>/dev/null || true
+          dotplane-remote login \
+            --url "${{ secrets.DOTPLANE_BASE_URL }}" \
+            --url-key "${{ secrets.DOTPLANE_URL_KEY }}" \
+            --username "${{ secrets.DOTPLANE_USER }}" \
+            --password "${{ secrets.DOTPLANE_PASSWORD }}"
+          dotplane-remote deploy-all \
+            --app "${{ env.APP_ID }}" \
+            --version "${{ github.ref_name }}" \
+            --batch-size 3 \
+            --delay 30

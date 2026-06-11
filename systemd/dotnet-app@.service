@@ -1,0 +1,52 @@
+[Unit]
+Description=Dotplane App - %i
+After=network.target
+# Optional: After=postgresql.service if DB is local
+
+[Service]
+Type=notify
+# %i = instance ID (e.g. mehta-jewels)
+# Override file sets WorkingDirectory, ExecStart, port, memory limits
+
+WorkingDirectory=/var/dotplane/instances/%i/app
+ExecStart=/usr/share/dotnet/dotnet /var/dotplane/instances/%i/app/app.dll
+ExecReload=/bin/kill -s HUP $MAINPID
+
+Restart=on-failure
+RestartSec=5s
+TimeoutStartSec=30s
+TimeoutStopSec=10s
+
+# Security hardening
+User=www-data
+Group=www-data
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/dotplane/instances/%i
+
+# GC and runtime defaults (overridden per instance in override.conf)
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_ROOT=/usr/share/dotnet
+Environment=DOTNET_gcServer=0
+Environment=DOTNET_GCConservatoryMode=1
+Environment=DOTNET_GCLatencyMode=1
+Environment=DOTNET_TieredCompilation=1
+Environment=DOTNET_TieredPGO=1
+Environment=DOTNET_ReadyToRun=1
+Environment=DOTNET_EnableDiagnostics=0
+Environment=COMPlus_EnableDiagnostics=0
+Environment=Kestrel__Limits__MaxConcurrentConnections=100
+Environment=Kestrel__Limits__MaxRequestBodySize=10485760
+Environment=Kestrel__Limits__KeepAliveTimeout=120
+Environment=Kestrel__Limits__RequestHeadersTimeout=15
+
+# Resource defaults (overridden per tier in override.conf)
+MemoryHigh=400M
+MemoryMax=512M
+CPUQuota=80%
+TasksMax=64
+MemorySwapMax=0
+
+[Install]
+WantedBy=multi-user.target

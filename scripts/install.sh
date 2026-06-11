@@ -1,0 +1,360 @@
+#!/bin/bash
+# Dotplane — full platform + agent install (single server)
+#
+# Installs: fnm/Node 20, prebuilt Caddy, .NET 8 SDK, SQLite-backed Platform,
+# UFW, fail2ban, mTLS certs, systemd units, daily backup cron.
+#
+# Run as root on Ubuntu 22.04+ / Debian 12+.
+#
+# Install methods:
+#   1. bootstrap-install.sh  — curl one-liner from GitHub Release (recommended)
+#   2. git clone + install.sh — builds from source on server
+#   3. install.sh --from-release /path — pre-extracted release tarball
+#   4. DOTPLANE_RELEASE_URL=... install.sh — download tarball URL
+
+set -euo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+log()  { echo -e "${BLUE}[dotplane]${NC} $1"; }
+ok()   { echo -e "${GREEN}[✓]${NC} $1"; }
+warn() { echo -e "${YELLOW}[!]${NC} $1"; }
+fail() { echo -e "${RED}[✗]${NC} $1"; exit 1; }
+
+[[ $EUID -ne 0 ]] && fail "Run as root"
+[[ "$(uname -s)" != "Linux" ]] && fail "Linux only"
+
+DOTPLANE_ROOT="${DOTPLANE_ROOT:-/opt/dotplane}"
+DATA_DIR="${DOTPLANE_ROOT}/data"
+BACKUP_DIR="${DATA_DIR}/backups"
+ARTIFACTS_DIR="/var/dotplane/artifacts"
+INSTANCES_DIR="/var/dotplane/instances"
+LOG_DIR="/var/log/dotplane"
+FNM_DIR="/usr/local/share/fnm"
+NODE_VERSION="${NODE_VERSION:-20}"
+FROM_RELEASE=""
+DOTPLANE_SKIP_BUILD="${DOTPLANE_SKIP_BUILD:-0}"
+
+# bootstrap-install.sh passes: install.sh --from-release /tmp/.../dotplane-v1.0.0-linux-amd64
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --from-release) FROM_RELEASE="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+
+# ── 1. System dependencies ───────────────────────────────────────────────────
+log "Installing system dependencies..."
+export DEBIAN_FRONTEND=noninteractive
+apt-get update -qq
+apt-get install -y -qq \
+  curl wget unzip rsync openssl ca-certificates \
+  ufw fail2ban sqlite3 \
+  systemd jq
+
+# ── 2. Node.js via fnm ───────────────────────────────────────────────────────
+log "Installing Node.js ${NODE_VERSION} via fnm..."
+if ! command -v fnm >/dev/null 2>&1; then
+  curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir /usr/local --skip-shell
+fi
+export PATH="/usr/local/bin:${PATH}"
+eval "$(fnm env --shell bash)"
+fnm install "$NODE_VERSION"
+fnm default "$NODE_VERSION"
+NODE_BIN="$(fnm which node)"
+ok "Node $($NODE_BIN --version) via fnm"
+
+# ── 3. Caddy (prebuilt binary) ─────────────────────────────────────────────────
+# NOTE: For custom Caddy modules (e.g. cloudflare DNS), build with xcaddy instead:
+#   go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
+#   xcaddy build --with github.com/caddy-dns/cloudflare
+# The prebuilt binary from caddyserver.com is sufficient for standard reverse proxy use.
+log "Installing Caddy (prebuilt)..."
+ARCH="$(uname -m)"
+case "$ARCH" in
+  x86_64)  CADDY_ARCH="amd64" ;;
+  aarch64) CADDY_ARCH="arm64" ;;
+  *)       fail "Unsupported architecture: $ARCH" ;;
+esac
+curl -fsSL "https://caddyserver.com/api/download?os=linux&arch=${CADDY_ARCH}" \
+  -o /usr/local/bin/caddy
+chmod +x /usr/local/bin/caddy
+
+cat > /etc/systemd/system/caddy.service << 'EOF'
+[Unit]
+Description=Caddy
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/caddy run --config /etc/caddy/Caddyfile --resume
+ExecReload=/usr/local/bin/caddy reload --config /etc/caddy/Caddyfile
+Restart=on-failure
+User=caddy
+Group=caddy
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+useradd -r -s /bin/false caddy 2>/dev/null || true
+mkdir -p /etc/caddy /var/lib/caddy
+chown -R caddy:caddy /var/lib/caddy
+ok "Caddy $(caddy version | head -1)"
+
+# ── 4. .NET SDK ────────────────────────────────────────────────────────────────
+log "Installing .NET 8 SDK..."
+curl -fsSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh
+chmod +x /tmp/dotnet-install.sh
+/tmp/dotnet-install.sh --channel 8.0 --install-dir /usr/share/dotnet --no-path
+ln -sf /usr/share/dotnet/dotnet /usr/local/bin/dotnet 2>/dev/null || true
+ok ".NET $(/usr/share/dotnet/dotnet --version)"
+
+# ── 5. Firewall (UFW) ────────────────────────────────────────────────────────
+log "Configuring UFW..."
+ufw --force reset >/dev/null 2>&1 || true
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow OpenSSH
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw --force enable
+ok "UFW enabled (22, 80, 443)"
+
+# ── 6. fail2ban ──────────────────────────────────────────────────────────────
+log "Configuring fail2ban..."
+cat > /etc/fail2ban/jail.d/dotplane.conf << 'EOF'
+[DEFAULT]
+bantime  = 1h
+findtime = 10m
+maxretry = 5
+
+[sshd]
+enabled = true
+port    = ssh
+filter  = sshd
+logpath = /var/log/auth.log
+maxretry = 5
+bantime  = 1h
+EOF
+systemctl enable fail2ban
+systemctl restart fail2ban
+ok "fail2ban configured for SSH"
+
+# ── 7. Generate secrets ────────────────────────────────────────────────────────
+log "Generating secrets..."
+PLATFORM_PORT=$(shuf -i 49152-65535 -n 1)
+URL_KEY="ov_$(openssl rand -hex 3)"
+JWT_SECRET=$(openssl rand -hex 64)
+REFRESH_SECRET=$(openssl rand -hex 64)
+CSRF_SECRET=$(openssl rand -hex 32)
+ENCRYPTION_KEY=$(openssl rand -hex 32)
+
+# ── 8. Directory layout ────────────────────────────────────────────────────────
+log "Creating directories..."
+mkdir -p "$DOTPLANE_ROOT" "$DATA_DIR" "$BACKUP_DIR" "$ARTIFACTS_DIR" "$INSTANCES_DIR" "$LOG_DIR"
+mkdir -p "${DOTPLANE_ROOT}/certs" "${DOTPLANE_ROOT}/scripts"
+chmod 700 "$DOTPLANE_ROOT" "${DOTPLANE_ROOT}/certs" "$DATA_DIR" "$BACKUP_DIR"
+
+# ── Deploy application files ───────────────────────────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+if [[ -n "$FROM_RELEASE" && -d "$FROM_RELEASE" ]]; then
+  log "Installing from release bundle..."
+  rsync -a --delete "$FROM_RELEASE/" "$DOTPLANE_ROOT/"
+elif [[ -n "${DOTPLANE_RELEASE_URL:-}" ]]; then
+  log "Downloading release from ${DOTPLANE_RELEASE_URL}..."
+  TMP_TAR="$(mktemp)"
+  curl -fsSL "$DOTPLANE_RELEASE_URL" -o "$TMP_TAR"
+  mkdir -p "$DOTPLANE_ROOT"
+  tar -xzf "$TMP_TAR" -C "$(dirname "$DOTPLANE_ROOT")"
+  rm -f "$TMP_TAR"
+  # Tarball extracts as dotplane-{version}-linux-{arch}/ — move contents up
+  BUNDLE="$(find "$(dirname "$DOTPLANE_ROOT")" -maxdepth 1 -type d -name 'dotplane-*-linux-*' | sort -r | head -1)"
+  if [[ -n "$BUNDLE" && "$BUNDLE" != "$DOTPLANE_ROOT" ]]; then
+    rsync -a "$BUNDLE/" "$DOTPLANE_ROOT/"
+    rm -rf "$BUNDLE"
+  fi
+  DOTPLANE_SKIP_BUILD=1
+elif [[ -f "$REPO_ROOT/package.json" ]]; then
+  log "Copying Dotplane source from checkout to ${DOTPLANE_ROOT}..."
+  rsync -a --exclude node_modules --exclude dist --exclude .git \
+    "$REPO_ROOT/" "$DOTPLANE_ROOT/"
+else
+  fail "No source found. Use bootstrap-install.sh, set DOTPLANE_RELEASE_URL, or run from a git checkout."
+fi
+
+mkdir -p "${DOTPLANE_ROOT}/scripts"
+cp "${DOTPLANE_ROOT}/scripts/generate-certs.sh" "${DOTPLANE_ROOT}/scripts/" 2>/dev/null \
+  || cp "$SCRIPT_DIR/generate-certs.sh" "${DOTPLANE_ROOT}/scripts/"
+chmod +x "${DOTPLANE_ROOT}/scripts/generate-certs.sh"
+
+# ── 9. Generate mTLS certs ─────────────────────────────────────────────────────
+log "Generating mTLS certificates..."
+CERT_DIR="${DOTPLANE_ROOT}/certs" bash "${DOTPLANE_ROOT}/scripts/generate-certs.sh"
+chmod 700 "${DOTPLANE_ROOT}/certs"
+chmod 600 "${DOTPLANE_ROOT}/certs"/*.key
+ok "mTLS certs generated"
+
+# ── 10. Install Platform dependencies & build ──────────────────────────────────
+cd "$DOTPLANE_ROOT"
+PLATFORM_ENTRY="${DOTPLANE_ROOT}/packages/platform/dist/server/index.js"
+AGENT_ENTRY="${DOTPLANE_ROOT}/packages/agent/dist/index.js"
+
+if [[ "$DOTPLANE_SKIP_BUILD" == "1" && -f "$PLATFORM_ENTRY" && -f "$AGENT_ENTRY" ]]; then
+  log "Using pre-built release artifacts — installing production dependencies..."
+  if command -v pnpm >/dev/null 2>&1; then
+    pnpm install --prod --frozen-lockfile 2>/dev/null || pnpm install --prod
+  else
+    npm install --omit=dev --workspace=@dotplane/platform --workspace=@dotplane/agent 2>/dev/null \
+      || (cd packages/platform && npm install --omit=dev && cd ../agent && npm install --omit=dev)
+  fi
+  ok "Production dependencies installed"
+else
+  log "Building Dotplane Platform from source..."
+  if command -v pnpm >/dev/null 2>&1; then
+    pnpm install --frozen-lockfile 2>/dev/null || pnpm install
+    pnpm --filter @dotplane/platform build
+    pnpm --filter @dotplane/agent build
+  else
+    npm install
+    npm run build --workspace=@dotplane/platform 2>/dev/null || (cd packages/platform && npm install && npm run build)
+    npm run build --workspace=@dotplane/agent 2>/dev/null || (cd packages/agent && npm install && npm run build)
+  fi
+fi
+
+# ── 11. Write .env ─────────────────────────────────────────────────────────────
+cat > "${DOTPLANE_ROOT}/.env" << EOF
+NODE_ENV=production
+PLATFORM_PORT=${PLATFORM_PORT}
+PLATFORM_HOST=127.0.0.1
+PLATFORM_URL_KEY=${URL_KEY}
+
+JWT_SECRET=${JWT_SECRET}
+REFRESH_SECRET=${REFRESH_SECRET}
+CSRF_SECRET=${CSRF_SECRET}
+ENCRYPTION_KEY=${ENCRYPTION_KEY}
+
+DB_PATH=${DATA_DIR}/dotplane.db
+BACKUP_DIR=${BACKUP_DIR}
+ARTIFACTS_PATH=${ARTIFACTS_DIR}
+ERROR_LOG_PATH=${LOG_DIR}/error.log
+
+MTLS_CA_CERT_PATH=${DOTPLANE_ROOT}/certs/ca.crt
+MTLS_CLIENT_CERT_PATH=${DOTPLANE_ROOT}/certs/platform.crt
+MTLS_CLIENT_KEY_PATH=${DOTPLANE_ROOT}/certs/platform.key
+EOF
+chmod 600 "${DOTPLANE_ROOT}/.env"
+
+# ── 12. Run database migrations ────────────────────────────────────────────────
+log "Running database migrations..."
+cd "$DOTPLANE_ROOT/packages/platform"
+"$NODE_BIN" --import tsx src/server/db/migrate.ts 2>/dev/null \
+  || "$NODE_BIN" dist/server/db/migrate.js 2>/dev/null \
+  || warn "Migration step skipped — run 'pnpm db:migrate' manually if needed"
+ok "SQLite database ready at ${DATA_DIR}/dotplane.db"
+
+# ── 13. Set admin password ─────────────────────────────────────────────────────
+echo ""
+read -s -p "Set admin password (min 12 chars): " ADMIN_PASS
+echo ""
+[[ ${#ADMIN_PASS} -lt 12 ]] && fail "Password too short (minimum 12 characters)"
+
+CLI="${DOTPLANE_ROOT}/packages/platform/dist/server/cli.js"
+if [[ -f "$CLI" ]]; then
+  "$NODE_BIN" "$CLI" set-password admin "$ADMIN_PASS"
+else
+  warn "Platform CLI not found — set admin password via UI on first login"
+fi
+
+# ── 14. Install systemd units ──────────────────────────────────────────────────
+log "Installing systemd units..."
+PLATFORM_ENTRY="${DOTPLANE_ROOT}/packages/platform/dist/server/index.js"
+
+cat > /etc/systemd/system/dotplane.service << EOF
+[Unit]
+Description=Dotplane Platform
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=${DOTPLANE_ROOT}/packages/platform
+ExecStart=${NODE_BIN} ${PLATFORM_ENTRY}
+Restart=always
+RestartSec=5
+User=root
+EnvironmentFile=${DOTPLANE_ROOT}/.env
+Environment=PATH=/usr/local/bin:/usr/share/dotnet:/usr/bin:/bin
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+cp "${DOTPLANE_ROOT}/systemd/dotnet-app@.service" /etc/systemd/system/
+ok "systemd units installed"
+
+# ── 15. Write Caddyfile ────────────────────────────────────────────────────────
+SERVER_IP="$(curl -fsSL --max-time 5 https://api.ipify.org 2>/dev/null || hostname -I | awk '{print $1}')"
+cat > /etc/caddy/Caddyfile << EOF
+{
+    admin localhost:2019
+    persist_config on
+}
+
+:443 {
+    reverse_proxy 127.0.0.1:${PLATFORM_PORT}
+}
+EOF
+
+# ── 16. Daily backup cron ──────────────────────────────────────────────────────
+log "Installing daily backup cron..."
+cat > /etc/cron.d/dotplane-backup << EOF
+# Dotplane SQLite backup — daily at 02:00 UTC
+0 2 * * * root ${NODE_BIN} -e "
+const Database = require('better-sqlite3');
+const fs = require('fs');
+const path = require('path');
+const src = '${DATA_DIR}/dotplane.db';
+const dir = '${BACKUP_DIR}';
+const ts = new Date().toISOString().replace(/[:.]/g, '-');
+const dest = path.join(dir, 'dotplane-' + ts + '.db');
+fs.mkdirSync(dir, { recursive: true });
+Database(src).backup(dest);
+const files = fs.readdirSync(dir).filter(f => f.endsWith('.db')).sort().reverse();
+files.slice(30).forEach(f => fs.unlinkSync(path.join(dir, f)));
+" >> ${LOG_DIR}/backup.log 2>&1
+EOF
+chmod 644 /etc/cron.d/dotplane-backup
+ok "Backup cron installed (daily 02:00, 30-day retention)"
+
+# ── 17. Start services ─────────────────────────────────────────────────────────
+systemctl daemon-reload
+systemctl enable dotplane caddy
+systemctl start dotplane caddy
+
+# ── 18. Install local agent ────────────────────────────────────────────────────
+log "Installing Agent on this server..."
+if [[ -f "$CLI" ]]; then
+  "$NODE_BIN" "$CLI" install-local-agent 2>/dev/null || warn "install-local-agent skipped — register server via UI"
+else
+  warn "Register this server via the Platform UI after first login"
+fi
+
+# ── 19. Done ───────────────────────────────────────────────────────────────────
+echo ""
+echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${NC}"
+echo -e "${GREEN}║           Dotplane Installed Successfully            ║${NC}"
+echo -e "${GREEN}╠══════════════════════════════════════════════════════╣${NC}"
+echo -e "${GREEN}║${NC}  Panel URL  : https://${SERVER_IP}/${URL_KEY}"
+echo -e "${GREEN}║${NC}  Username   : admin"
+echo -e "${GREEN}║${NC}  Password   : (the one you just set)"
+echo -e "${GREEN}║${NC}  Database   : ${DATA_DIR}/dotplane.db (SQLite)"
+echo -e "${GREEN}║${NC}  Backups    : ${BACKUP_DIR}"
+echo -e "${GREEN}║${NC}"
+echo -e "${GREEN}║${NC}  Save the URL — it won't be shown again"
+echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${NC}"

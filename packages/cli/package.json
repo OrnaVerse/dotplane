@@ -1,0 +1,23 @@
+{
+  "name": "@dotplane/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "dotplane-remote": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "commander": "^12.1.0",
+    "inquirer": "^12.0.2",
+    "ora": "^8.1.1",
+    "undici": "^7.1.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "typescript": "^5.7.2"
+  }
+}

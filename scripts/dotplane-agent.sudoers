@@ -1,0 +1,13 @@
+# /etc/sudoers.d/dotplane-agent
+# Install with: visudo -c -f /etc/sudoers.d/dotplane-agent
+
+dotplane-agent ALL=(root) NOPASSWD: /usr/bin/systemctl start dotnet-app@*
+dotplane-agent ALL=(root) NOPASSWD: /usr/bin/systemctl stop dotnet-app@*
+dotplane-agent ALL=(root) NOPASSWD: /usr/bin/systemctl enable dotnet-app@*
+dotplane-agent ALL=(root) NOPASSWD: /usr/bin/systemctl disable dotnet-app@*
+dotplane-agent ALL=(root) NOPASSWD: /usr/bin/systemctl reload dotnet-app@*
+dotplane-agent ALL=(root) NOPASSWD: /usr/bin/systemctl daemon-reload
+dotplane-agent ALL=(root) NOPASSWD: /usr/bin/journalctl -u dotnet-app@*
+dotplane-agent ALL=(root) NOPASSWD: /usr/sbin/ufw status numbered
+dotplane-agent ALL=(root) NOPASSWD: /usr/bin/fail2ban-client status *
+dotplane-agent ALL=(root) NOPASSWD: /usr/bin/fail2ban-client set * unbanip *

@@ -1,0 +1,54 @@
+# Bitbucket Pipelines — build and sync release to Dotplane.
+#
+# Copy to your app repo: bitbucket-pipelines.yml
+#
+# Required repository variables (Settings → Pipelines → Repository variables):
+#   DOTPLANE_URL            — https://platform.example.com/ov_yourkey
+#   DOTPLANE_DEPLOY_TOKEN   — deploy token (secured)
+#   DOTPLANE_BASE_URL       — https://platform.example.com (optional, for CLI)
+#   DOTPLANE_URL_KEY        — ov_yourkey (optional)
+#   DOTPLANE_USER           — CI service account (optional)
+#   DOTPLANE_PASSWORD       — CI password (secured, optional)
+
+image: mcr.microsoft.com/dotnet/sdk:8.0
+
+definitions:
+  steps:
+    - step: &build-release
+        name: Build and publish
+        script:
+          - dotnet publish src/YourApp/YourApp.csproj -c Release -r linux-x64 --self-contained false -o ./publish
+          - cd publish && zip -r ../app.zip . && cd ..
+        artifacts:
+          - app.zip
+
+    - step: &sync-dotplane
+        name: Sync to Dotplane
+        script:
+          - |
+            curl -fsSL -X POST \
+              -H "Authorization: Bearer ${DOTPLANE_DEPLOY_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "{\"appId\":\"ornaverse\",\"version\":\"${BITBUCKET_TAG}\"}" \
+              "${DOTPLANE_URL}/api/releases/sync"
+
+    - step: &deploy-all
+        name: Deploy all instances
+        image: node:20
+        trigger: manual
+        script:
+          - npm install -g @dotplane/cli
+          - |
+            dotplane-remote login \
+              --url "${DOTPLANE_BASE_URL}" \
+              --url-key "${DOTPLANE_URL_KEY}" \
+              --username "${DOTPLANE_USER}" \
+              --password "${DOTPLANE_PASSWORD}"
+          - dotplane-remote deploy-all --app ornaverse --version "${BITBUCKET_TAG}"
+
+pipelines:
+  tags:
+    'v*':
+      - step: *build-release
+      - step: *sync-dotplane
+      - step: *deploy-all

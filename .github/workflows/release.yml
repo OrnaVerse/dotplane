@@ -1,0 +1,75 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64]
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm -r build
+
+      - name: Package release tarball
+        run: |
+          chmod +x scripts/package-release.sh
+          ARCH=${{ matrix.arch }} bash scripts/package-release.sh "${GITHUB_REF_NAME}"
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist-releases/dotplane-${{ github.ref_name }}-linux-${{ matrix.arch }}.tar.gz
+          generate_release_notes: true
+          body: |
+            ## Install (one line)
+
+            ```bash
+            curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/bootstrap-install.sh | \
+              sudo DOTPLANE_GITHUB_REPO=${{ github.repository }} DOTPLANE_VERSION=${{ github.ref_name }} bash
+            ```
+
+            ## Install latest (auto-resolve version)
+
+            ```bash
+            curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/bootstrap-install.sh | \
+              sudo DOTPLANE_GITHUB_REPO=${{ github.repository }} bash
+            ```
+
+            ## Manual install from tarball
+
+            ```bash
+            curl -fsSL -o dotplane.tar.gz \
+              https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/dotplane-${{ github.ref_name }}-linux-amd64.tar.gz
+            sudo DOTPLANE_RELEASE_URL=file://$(pwd)/dotplane.tar.gz bash scripts/install.sh
+            ```
+
+            **Architecture:** linux-${{ matrix.arch }}
+
+            Native modules (`better-sqlite3`, `argon2`) are compiled on the target server during `pnpm install --prod`.
