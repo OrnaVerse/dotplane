@@ -45,8 +45,24 @@ if [[ ! -f "$ENV_FILE" ]]; then
   exit 1
 fi
 
-[[ -f "${DOTPLANE_ROOT}/packages/platform/dist/server/index.js" ]] || \
-  fail "Platform not installed at ${DOTPLANE_ROOT} — re-run the bootstrap installer"
+[[ -f "${DOTPLANE_ROOT}/packages/platform/dist/server/index.js" ]] || {
+  echo ""
+  echo -e "${RED}[✗]${NC} Platform build artifacts not found at:"
+  echo "      ${DOTPLANE_ROOT}/packages/platform/dist/server/index.js"
+  echo ""
+  echo "  This means the install completed dependency/config steps but the"
+  echo "  source build (or release rsync) did not finish."
+  echo ""
+  echo "  Options:"
+  echo "    A) Re-run the full bootstrap installer (recommended):"
+  echo "         curl -fsSL https://raw.githubusercontent.com/OrnaVerse/dotplane/main/scripts/bootstrap-install.sh | \\"
+  echo "           sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane bash"
+  echo "    B) If running from a git checkout, build manually then retry:"
+  echo "         cd ${DOTPLANE_ROOT} && pnpm install && pnpm --filter @dotplane/platform build && pnpm --filter @dotplane/agent build"
+  echo "         sudo bash ${DOTPLANE_ROOT}/scripts/setup-services.sh"
+  echo ""
+  exit 1
+}
 
 # shellcheck disable=SC1090
 set -a; source "$ENV_FILE"; set +a

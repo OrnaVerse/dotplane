@@ -26,13 +26,23 @@ warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 fail() { echo -e "${RED}[✗]${NC} $1"; exit 1; }
 
 SUMMARY_PRINTED=0
+INSTALL_COMPLETE=0
 ACCESS_FILE=""
 
 print_install_summary() {
   [[ "${SUMMARY_PRINTED}" == "1" ]] && return
-  # Skip summary entirely if secrets were never generated (very early failure)
+  # Skip entirely if secrets were never generated (very early failure)
   [[ -z "${URL_KEY:-}" ]] && return
   [[ -z "${PLATFORM_PORT:-}" ]] && return
+
+  if [[ "${INSTALL_COMPLETE}" != "1" ]]; then
+    echo ""
+    echo -e "${RED}[✗] Install did not complete — check the errors above.${NC}"
+    echo "    To finish wiring up services after fixing any issue, run:"
+    echo "      sudo bash /opt/dotplane/scripts/setup-services.sh"
+    SUMMARY_PRINTED=1
+    return
+  fi
 
   local ip="${SERVER_IP:-}"
   if [[ -z "$ip" ]]; then
@@ -415,4 +425,5 @@ else
 fi
 
 # ── 16. Done ───────────────────────────────────────────────────────────────────
+INSTALL_COMPLETE=1
 print_install_summary

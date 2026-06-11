@@ -19,10 +19,19 @@ warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 fail() { echo -e "${RED}[✗]${NC} $1"; exit 1; }
 
 SUMMARY_PRINTED=0
+INSTALL_COMPLETE=0
 
 print_install_summary() {
   [[ "${SUMMARY_PRINTED}" == "1" ]] && return
   [[ -z "${URL_KEY:-}" ]] && return
+
+  if [[ "${INSTALL_COMPLETE}" != "1" ]]; then
+    echo ""
+    echo -e "${RED}[✗] finish-install did not complete — check the errors above.${NC}"
+    echo "    To retry: sudo bash /opt/dotplane/scripts/finish-install.sh"
+    SUMMARY_PRINTED=1
+    return
+  fi
 
   local ip="${SERVER_IP:-}"
   if [[ -z "$ip" ]]; then
@@ -130,4 +139,5 @@ DOTPLANE_SETUP_QUIET=1 bash "${DOTPLANE_ROOT}/scripts/setup-services.sh" \
 DOTPLANE_ENV_PATH="$ENV_FILE" DB_PATH="${DB_PATH}" \
   "$NODE_BIN" "$CLI" install-local-agent 2>/dev/null || warn "install-local-agent skipped"
 
+INSTALL_COMPLETE=1
 print_install_summary

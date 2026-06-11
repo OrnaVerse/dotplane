@@ -75,12 +75,15 @@ EXTRACTED="$(find "$TMP_DIR" -maxdepth 1 -type d -name 'dotplane-*' | head -1)"
 log "Starting install..."
 # curl|bash closes the pipe when the download finishes — that SIGHUP kills installs
 # still running in the same session. setsid starts a new session so install continues.
+# --wait is required: without it, util-linux setsid forks the child into the new
+# session and returns immediately (exit 0), so the recovery checks below would fire
+# before .env or the service file are written, causing a concurrent second install.
 INSTALL_RC=0
 if [[ -r /dev/tty && -w /dev/tty ]]; then
-  setsid bash "${EXTRACTED}/scripts/install.sh" --from-release "${EXTRACTED}" </dev/tty >/dev/tty 2>&1 \
+  setsid --wait bash "${EXTRACTED}/scripts/install.sh" --from-release "${EXTRACTED}" </dev/tty >/dev/tty 2>&1 \
     || INSTALL_RC=$?
 else
-  setsid bash "${EXTRACTED}/scripts/install.sh" --from-release "${EXTRACTED}" \
+  setsid --wait bash "${EXTRACTED}/scripts/install.sh" --from-release "${EXTRACTED}" \
     || INSTALL_RC=$?
 fi
 
