@@ -189,15 +189,23 @@ chmod +x /usr/local/bin/caddy
 cat > /etc/systemd/system/caddy.service << 'EOF'
 [Unit]
 Description=Caddy
-After=network.target
+Documentation=https://caddyserver.com/docs/
+After=network.target network-online.target
+Requires=network-online.target
 
 [Service]
-ExecStart=/usr/local/bin/caddy run --config /etc/caddy/Caddyfile --resume
-ExecReload=/usr/local/bin/caddy reload --config /etc/caddy/Caddyfile
-Restart=on-failure
+Type=notify
 User=caddy
 Group=caddy
-AmbientCapabilities=CAP_NET_BIND_SERVICE
+ExecStart=/usr/local/bin/caddy run --config /etc/caddy/Caddyfile
+ExecReload=/usr/local/bin/caddy reload --config /etc/caddy/Caddyfile --force
+TimeoutStopSec=5s
+LimitNOFILE=1048576
+PrivateTmp=true
+ProtectSystem=full
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
