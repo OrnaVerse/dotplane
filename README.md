@@ -35,15 +35,15 @@ Dashboard: `http://localhost:5173/dev` (Vite) proxied to API at `http://127.0.0.
 Push a version tag to trigger the release workflow, then on your Linux server:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_ORG/dotplane/main/scripts/bootstrap-install.sh | \
-  sudo DOTPLANE_GITHUB_REPO=YOUR_ORG/dotplane bash
+curl -fsSL https://raw.githubusercontent.com/OrnaVerse/dotplane/main/scripts/bootstrap-install.sh | \
+  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane bash
 ```
 
 Pin a specific version:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_ORG/dotplane/main/scripts/bootstrap-install.sh | \
-  sudo DOTPLANE_GITHUB_REPO=YOUR_ORG/dotplane DOTPLANE_VERSION=v1.0.0 bash
+curl -fsSL https://raw.githubusercontent.com/OrnaVerse/dotplane/main/scripts/bootstrap-install.sh | \
+  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane DOTPLANE_VERSION=v1.0.0 bash
 ```
 
 The bootstrap script downloads the pre-built release tarball, installs system dependencies (Node, Caddy, .NET, UFW, fail2ban), generates secrets, and starts services. Native modules compile on the target server during production dependency install.
@@ -51,7 +51,7 @@ The bootstrap script downloads the pre-built release tarball, installs system de
 ### Option B — Git clone + install (development / air-gapped)
 
 ```bash
-git clone https://github.com/YOUR_ORG/dotplane.git
+git clone https://github.com/OrnaVerse/dotplane.git
 cd dotplane
 sudo bash scripts/install.sh
 ```
