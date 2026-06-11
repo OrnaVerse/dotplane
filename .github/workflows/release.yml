@@ -21,11 +21,11 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - uses: pnpm/action-setup@a7487c7e125a348d1d048caaff661e0312b929a1 # v4.1.0
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: 9
 
-      - uses: actions/setup-node@49933ea528805ca4aeafc93d6d9bfcdb677eabbb # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
           cache: pnpm
@@ -42,7 +42,7 @@ jobs:
           ARCH=${{ matrix.arch }} bash scripts/package-release.sh "${GITHUB_REF_NAME}"
 
       - name: Upload release asset
-        uses: softprops/action-gh-release@c062e08bd6521085b23567911dad4868dc25d0df # v2.2.0
+        uses: softprops/action-gh-release@7b4da11513bf3f43f9999e90eabced41ab8bb048 # v2.2.0
         with:
           files: |
             dist-releases/dotplane-${{ github.ref_name }}-linux-${{ matrix.arch }}.tar.gz
