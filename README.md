@@ -45,7 +45,7 @@ Pin a specific version:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/OrnaVerse/dotplane/main/scripts/bootstrap-install.sh | \
-  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane DOTPLANE_VERSION=v0.1.15 bash
+  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane DOTPLANE_VERSION=v0.1.16 bash
 ```
 
 The bootstrap script downloads the pre-built release tarball, installs system dependencies (Node, Caddy, .NET, UFW, fail2ban), generates secrets, and starts services. Native modules compile on the target server during production dependency install.
@@ -146,9 +146,13 @@ node /opt/dotplane/packages/platform/dist/server/cli.js set-password 'your-usern
 node /opt/dotplane/packages/platform/dist/server/cli.js show-access
 ```
 
-If a piped install stopped before showing credentials:
+If a piped install stopped early:
 
 ```bash
+# Services missing (dotplane.service not found) — no credential changes:
+sudo bash /opt/dotplane/scripts/setup-services.sh
+
+# Full completion including migrations/credentials:
 sudo bash /opt/dotplane/scripts/finish-install.sh
 ```
 
@@ -161,6 +165,14 @@ sudo DOTPLANE_ENV_PATH=/opt/dotplane/.env node dist/server/cli.js show-access
 ```
 
 On cloud VMs (GCP, AWS, etc.), open the `PLATFORM_PORT` TCP port in your provider's firewall — UFW on the server is not enough.
+
+### `dotplane.service could not be found` or Caddy `inactive (dead)`
+
+The install stopped before systemd setup. Run:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/OrnaVerse/dotplane/main/scripts/setup-services.sh | sudo bash
+```
 
 ### Post-install login not loading?
 

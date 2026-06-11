@@ -381,8 +381,6 @@ else
   warn "Platform CLI not found — set admin credentials via UI on first login"
 fi
 
-print_install_summary
-
 # ── 14. Install systemd units ──────────────────────────────────────────────────
 log "Installing systemd units..."
 PLATFORM_ENTRY="${DOTPLANE_ROOT}/packages/platform/dist/server/index.js"
