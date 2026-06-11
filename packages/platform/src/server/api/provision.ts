@@ -7,7 +7,7 @@ import { provisionJobs } from '../db/schema.js'
 
 import { routeParam } from './helpers.js'
 
-const router = Router()
+const router: Router = Router()
 
 const CreateProvisionSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/).max(50),

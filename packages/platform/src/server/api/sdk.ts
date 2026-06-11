@@ -7,7 +7,7 @@ import { db } from '../db/index.js'
 import { serverRuntimes, servers } from '../db/schema.js'
 import { emitSSE, setupSSE } from './helpers.js'
 
-const router = Router()
+const router: Router = Router()
 
 const InstallSchema = z.object({
   serverId: z.string().min(1),

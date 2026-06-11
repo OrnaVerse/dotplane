@@ -6,7 +6,7 @@ import { db } from '../db/index.js'
 import { auditLog } from '../db/schema.js'
 import { routeParam } from './helpers.js'
 
-const router = Router()
+const router: Router = Router()
 
 const QuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

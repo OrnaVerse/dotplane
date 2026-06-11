@@ -9,7 +9,7 @@ import { outboundWebhooks } from '../db/schema.js'
 
 import { routeParam } from './helpers.js'
 
-const router = Router()
+const router: Router = Router()
 
 const CreateWebhookSchema = z.object({
   name: z.string().min(1).max(100),

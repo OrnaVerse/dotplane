@@ -11,7 +11,7 @@ import { routeParam } from './helpers.js'
 import { db } from '../db/index.js'
 import { apps, releases } from '../db/schema.js'
 
-const router = Router()
+const router: Router = Router()
 const deployService = new DeployService()
 
 const ARTIFACTS_DIR = process.env.ARTIFACTS_PATH ?? './data/artifacts'

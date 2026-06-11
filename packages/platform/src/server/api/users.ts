@@ -16,7 +16,7 @@ import type { UserRole } from '../auth/tokens.js'
 
 import { routeParam } from './helpers.js'
 
-const router = Router()
+const router: Router = Router()
 
 const CreateUserSchema = z.object({
   username: z.string().min(1).max(64),

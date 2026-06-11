@@ -16,7 +16,7 @@ import {
 } from '../db/schema.js'
 import { emitSSE, parseIntQuery, routeParam, setupSSE } from './helpers.js'
 
-const router = Router()
+const router: Router = Router()
 const deployService = new DeployService()
 
 const CreateInstanceSchema = z.object({

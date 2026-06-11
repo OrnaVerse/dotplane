@@ -8,7 +8,7 @@ import { decrypt, encrypt } from '../utils/crypto.js'
 
 import { routeParam } from './helpers.js'
 
-const router = Router()
+const router: Router = Router()
 
 const SENSITIVE_KEYS = new Set([
   'github_token',

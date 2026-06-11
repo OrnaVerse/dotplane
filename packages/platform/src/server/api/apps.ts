@@ -7,7 +7,7 @@ import { apps, instances } from '../db/schema.js'
 import { encrypt } from '../utils/crypto.js'
 import { routeParam } from './helpers.js'
 
-const router = Router()
+const router: Router = Router()
 
 const VcsFieldsSchema = z.object({
   vcsProvider: z.enum(['github', 'gitlab', 'azure', 'bitbucket']),

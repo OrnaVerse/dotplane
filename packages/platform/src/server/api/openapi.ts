@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { requireEnv } from '../config.js'
 
-const router = Router()
+const router: Router = Router()
 
 router.get('/', (_req, res) => {
   const urlKey = requireEnv('PLATFORM_URL_KEY')

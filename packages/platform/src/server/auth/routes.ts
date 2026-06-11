@@ -27,7 +27,7 @@ import {
   type UserRole,
 } from './tokens.js'
 
-const router = Router()
+const router: Router = Router()
 
 const BACKUP_CODE_COUNT = 8
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000

@@ -19,7 +19,7 @@ import { requireEnv } from '../config.js'
 import { hashSha256 } from '../utils/crypto.js'
 import { routeParam } from './helpers.js'
 
-const router = Router()
+const router: Router = Router()
 
 const AGENT_TOKEN_TTL_MS = 24 * 60 * 60 * 1000
 

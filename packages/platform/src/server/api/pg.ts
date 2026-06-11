@@ -13,7 +13,7 @@ import {
 import { encrypt } from '../utils/crypto.js'
 import { routeParam } from './helpers.js'
 
-const router = Router()
+const router: Router = Router()
 
 const CreatePgServerSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/).max(50),
