@@ -57,9 +57,16 @@ install_dotplane_node() {
 }
 
 generate_dotplane_admin_username() {
-  echo "dp$(tr -dc 'a-z0-9' </dev/urandom | head -c 10)"
+  # Read from a finite openssl output so tr is never left with a broken pipe
+  # (tr /dev/urandom | head -c N causes SIGPIPE on tr; with pipefail that kills
+  # the caller even though the output is correct).
+  local raw
+  raw="$(openssl rand -base64 18 | tr -dc 'a-z0-9')"
+  printf 'dp%s' "${raw:0:10}"
 }
 
 generate_dotplane_admin_password() {
-  tr -dc 'A-Za-z0-9' </dev/urandom | head -c 12
+  local raw
+  raw="$(openssl rand -base64 18 | tr -dc 'A-Za-z0-9')"
+  printf '%s' "${raw:0:12}"
 }
