@@ -100,11 +100,14 @@ const commands: Record<string, () => Promise<void>> = {
     const env = await readEnvFile()
     const urlKey = process.env.PLATFORM_URL_KEY ?? env.PLATFORM_URL_KEY ?? ''
     const port = process.env.PLATFORM_PORT ?? env.PLATFORM_PORT ?? '58291'
+    const username = process.env.PLATFORM_ADMIN_USERNAME ?? env.PLATFORM_ADMIN_USERNAME ?? 'admin'
     const ip = await getPublicIp()
     console.log(`Panel URL: http://${anonymizeIp(ip)}:${port}/${urlKey}`)
     console.log(`HTTPS URL: https://${anonymizeIp(ip)}/${urlKey} (Caddy, port 443)`)
     console.log(`Port: ${port}`)
     console.log(`URL key: ${urlKey}`)
+    console.log(`Username: ${username}`)
+    console.log('Password: (see /opt/dotplane/access.txt or set a new one via set-password)')
   },
 
   backup: async () => {

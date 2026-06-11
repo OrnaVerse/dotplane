@@ -47,7 +47,7 @@ Panel URL: ${panel_url}
 HTTPS URL (Caddy): ${https_url}
 Port: ${port}
 URL key: ${URL_KEY}
-Username: admin
+Username: ${ADMIN_USER}
 Password: ${ADMIN_PASS}
 EOF
   chmod 600 "${ACCESS_FILE}"
@@ -60,7 +60,7 @@ EOF
   echo -e "${GREEN}║${NC}  HTTPS URL   : ${https_url} (Caddy, port 443)"
   echo -e "${GREEN}║${NC}  Port        : ${port}"
   echo -e "${GREEN}║${NC}  URL key     : ${URL_KEY}"
-  echo -e "${GREEN}║${NC}  Username   : admin"
+  echo -e "${GREEN}║${NC}  Username   : ${ADMIN_USER}"
   echo -e "${GREEN}║${NC}  Password   : ${ADMIN_PASS}"
   echo -e "${GREEN}║${NC}  Database   : ${DATA_DIR}/dotplane.db (SQLite)"
   echo -e "${GREEN}║${NC}  Backups    : ${BACKUP_DIR}"
@@ -312,12 +312,30 @@ else
   fi
 fi
 
+# ── 10b. Generate admin credentials ────────────────────────────────────────────
+if [[ -n "${DOTPLANE_ADMIN_USERNAME:-}" ]]; then
+  ADMIN_USER="$DOTPLANE_ADMIN_USERNAME"
+  ok "Using admin username from DOTPLANE_ADMIN_USERNAME"
+else
+  ADMIN_USER="$(generate_dotplane_admin_username)"
+  ok "Generated random admin username (shown in summary below)"
+fi
+
+if [[ -n "${DOTPLANE_ADMIN_PASSWORD:-}" ]]; then
+  ADMIN_PASS="$DOTPLANE_ADMIN_PASSWORD"
+  ok "Using admin password from DOTPLANE_ADMIN_PASSWORD"
+else
+  ADMIN_PASS="$(generate_dotplane_admin_password)"
+  ok "Generated random 12-character admin password (shown in summary below)"
+fi
+
 # ── 11. Write .env ─────────────────────────────────────────────────────────────
 cat > "${DOTPLANE_ROOT}/.env" << EOF
 NODE_ENV=production
 PLATFORM_PORT=${PLATFORM_PORT}
 PLATFORM_HOST=0.0.0.0
 PLATFORM_URL_KEY=${URL_KEY}
+PLATFORM_ADMIN_USERNAME=${ADMIN_USER}
 
 JWT_SECRET=${JWT_SECRET}
 REFRESH_SECRET=${REFRESH_SECRET}
@@ -350,25 +368,17 @@ else
 fi
 ok "SQLite database ready at ${DATA_DIR}/dotplane.db"
 
-# ── 13. Set admin password ─────────────────────────────────────────────────────
-if [[ -n "${DOTPLANE_ADMIN_PASSWORD:-}" ]]; then
-  ADMIN_PASS="$DOTPLANE_ADMIN_PASSWORD"
-  ok "Using admin password from DOTPLANE_ADMIN_PASSWORD"
-else
-  ADMIN_PASS="$(generate_dotplane_admin_password)"
-  ok "Generated random 12-character admin password (shown in summary below)"
-fi
-
+# ── 13. Set admin credentials ──────────────────────────────────────────────────
 CLI="${DOTPLANE_ROOT}/packages/platform/dist/server/cli.js"
 if [[ -f "$CLI" ]]; then
   if ! DOTPLANE_ENV_PATH="${DOTPLANE_ROOT}/.env" DB_PATH="${DATA_DIR}/dotplane.db" \
-    "$NODE_BIN" "$CLI" set-password admin "$ADMIN_PASS"; then
-    warn "Failed to set admin password — run: node ${CLI} set-password admin '...'"
+    "$NODE_BIN" "$CLI" set-password "$ADMIN_USER" "$ADMIN_PASS"; then
+    warn "Failed to set admin credentials — run: node ${CLI} set-password '${ADMIN_USER}' '...'"
   else
-    ok "Admin password configured"
+    ok "Admin credentials configured"
   fi
 else
-  warn "Platform CLI not found — set admin password via UI on first login"
+  warn "Platform CLI not found — set admin credentials via UI on first login"
 fi
 
 print_install_summary

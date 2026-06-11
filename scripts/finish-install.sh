@@ -39,7 +39,7 @@ Panel URL: ${panel_url}
 HTTPS URL (Caddy): ${https_url}
 Port: ${port}
 URL key: ${URL_KEY}
-Username: admin
+Username: ${ADMIN_USER}
 Password: ${ADMIN_PASS}
 EOF
   chmod 600 "${access_file}"
@@ -52,7 +52,7 @@ EOF
   echo -e "${GREEN}║${NC}  HTTPS URL   : ${https_url} (Caddy, port 443)"
   echo -e "${GREEN}║${NC}  Port        : ${port}"
   echo -e "${GREEN}║${NC}  URL key     : ${URL_KEY}"
-  echo -e "${GREEN}║${NC}  Username   : admin"
+  echo -e "${GREEN}║${NC}  Username   : ${ADMIN_USER}"
   echo -e "${GREEN}║${NC}  Password   : ${ADMIN_PASS}"
   echo -e "${GREEN}║${NC}  Access file: ${access_file}"
   echo -e "${GREEN}║${NC}"
@@ -98,6 +98,16 @@ export DB_PATH="${DB_PATH:-${DATA_DIR}/dotplane.db}"
   || "$NODE_BIN" --input-type=module -e "import('./dist/server/db/migrate.js').then((m) => { m.runMigrations(); console.log('Migrations complete') })"
 ok "Database migrations complete"
 
+if [[ -n "${PLATFORM_ADMIN_USERNAME:-}" ]]; then
+  ADMIN_USER="$PLATFORM_ADMIN_USERNAME"
+elif [[ -n "${DOTPLANE_ADMIN_USERNAME:-}" ]]; then
+  ADMIN_USER="$DOTPLANE_ADMIN_USERNAME"
+else
+  ADMIN_USER="$(generate_dotplane_admin_username)"
+  echo "PLATFORM_ADMIN_USERNAME=${ADMIN_USER}" >> "$ENV_FILE"
+  ok "Generated random admin username (shown in summary below)"
+fi
+
 if [[ -n "${DOTPLANE_ADMIN_PASSWORD:-}" ]]; then
   ADMIN_PASS="$DOTPLANE_ADMIN_PASSWORD"
   ok "Using admin password from DOTPLANE_ADMIN_PASSWORD"
@@ -107,8 +117,8 @@ else
 fi
 
 if ! DOTPLANE_ENV_PATH="$ENV_FILE" DB_PATH="${DB_PATH}" \
-  "$NODE_BIN" "$CLI" set-password admin "$ADMIN_PASS"; then
-  warn "Failed to set admin password — run: node ${CLI} set-password admin '...'"
+  "$NODE_BIN" "$CLI" set-password "$ADMIN_USER" "$ADMIN_PASS"; then
+  warn "Failed to set admin credentials — run: node ${CLI} set-password '${ADMIN_USER}' '...'"
 else
   ok "Admin credentials configured"
 fi
