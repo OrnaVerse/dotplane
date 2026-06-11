@@ -116,7 +116,6 @@ chown -R caddy:caddy /var/lib/caddy 2>/dev/null || true
 cat > /etc/caddy/Caddyfile << EOF
 {
     admin localhost:2019
-    persist_config on
 }
 
 :80 {
