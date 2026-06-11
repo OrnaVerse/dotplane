@@ -44,6 +44,14 @@ install_dotplane_node() {
   eval "$(fnm env --shell bash)"
   fnm install "$node_version"
   fnm default "$node_version"
-  NODE_BIN="$(fnm which node)"
+  # Stable path for systemd ExecStart (fnm no longer ships a `which` subcommand).
+  NODE_BIN="${FNM_DIR}/aliases/default/bin/node"
+  if [[ ! -x "$NODE_BIN" ]]; then
+    NODE_BIN="$(command -v node)"
+  fi
+  if [[ ! -x "$NODE_BIN" ]]; then
+    echo "Node binary not found after fnm install" >&2
+    return 1
+  fi
   export NODE_BIN
 }
