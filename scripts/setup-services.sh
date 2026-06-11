@@ -27,18 +27,39 @@ DATA_DIR="${DOTPLANE_ROOT}/data"
 BACKUP_DIR="${DATA_DIR}/backups"
 LOG_DIR="/var/log/dotplane"
 
-[[ -f "$ENV_FILE" ]] || fail "Missing ${ENV_FILE} — run install.sh first"
+if [[ ! -f "$ENV_FILE" ]]; then
+  echo ""
+  warn "Dotplane is not fully installed — ${ENV_FILE} is missing."
+  if [[ -d "$DOTPLANE_ROOT" ]]; then
+    echo "  Found ${DOTPLANE_ROOT} but install stopped before secrets were written."
+  else
+    echo "  ${DOTPLANE_ROOT} does not exist yet."
+  fi
+  echo ""
+  echo "  setup-services.sh only completes systemd/Caddy after a successful install."
+  echo "  Run the full bootstrap installer instead:"
+  echo ""
+  echo "    curl -fsSL https://raw.githubusercontent.com/OrnaVerse/dotplane/main/scripts/bootstrap-install.sh | \\"
+  echo "      sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane DOTPLANE_VERSION=v0.1.17 bash"
+  echo ""
+  exit 1
+fi
+
 [[ -f "${DOTPLANE_ROOT}/packages/platform/dist/server/index.js" ]] || \
-  fail "Platform not installed at ${DOTPLANE_ROOT}"
+  fail "Platform not installed at ${DOTPLANE_ROOT} — re-run the bootstrap installer"
 
 # shellcheck disable=SC1090
 set -a; source "$ENV_FILE"; set +a
 PLATFORM_PORT="${PLATFORM_PORT:?PLATFORM_PORT missing in .env}"
 URL_KEY="${PLATFORM_URL_KEY:?PLATFORM_URL_KEY missing in .env}"
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FNM_SCRIPT="${DOTPLANE_ROOT}/scripts/install-fnm.sh"
+if [[ ! -f "$FNM_SCRIPT" ]]; then
+  FNM_SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/install-fnm.sh"
+fi
+[[ -f "$FNM_SCRIPT" ]] || fail "install-fnm.sh not found — re-run the bootstrap installer"
 # shellcheck source=install-fnm.sh
-source "${SCRIPT_DIR}/install-fnm.sh"
+source "$FNM_SCRIPT"
 install_dotplane_node "${NODE_VERSION:-20}" >/dev/null 2>&1 || true
 export PATH="$(dirname "$NODE_BIN"):/usr/local/bin:/usr/share/dotnet:/usr/bin:/bin"
 

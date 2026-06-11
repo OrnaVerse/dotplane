@@ -149,10 +149,17 @@ node /opt/dotplane/packages/platform/dist/server/cli.js show-access
 If a piped install stopped early:
 
 ```bash
-# Services missing (dotplane.service not found) — no credential changes:
+# Check install state first:
+ls -la /opt/dotplane/.env /etc/systemd/system/dotplane.service 2>/dev/null
+
+# .env exists, but dotplane.service missing — finish service setup only:
 sudo bash /opt/dotplane/scripts/setup-services.sh
 
-# Full completion including migrations/credentials:
+# .env missing — install never finished; run full bootstrap (not setup-services):
+curl -fsSL https://raw.githubusercontent.com/OrnaVerse/dotplane/main/scripts/bootstrap-install.sh | \
+  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane DOTPLANE_VERSION=v0.1.17 bash
+
+# .env exists — re-run migrations, credentials, and services:
 sudo bash /opt/dotplane/scripts/finish-install.sh
 ```
 
@@ -168,11 +175,13 @@ On cloud VMs (GCP, AWS, etc.), open the `PLATFORM_PORT` TCP port in your provide
 
 ### `dotplane.service could not be found` or Caddy `inactive (dead)`
 
-The install stopped before systemd setup. Run:
+If `/opt/dotplane/.env` exists, finish service setup:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/OrnaVerse/dotplane/main/scripts/setup-services.sh | sudo bash
+sudo bash /opt/dotplane/scripts/setup-services.sh
 ```
+
+If `.env` is missing, the install never completed — run the full bootstrap installer (see above).
 
 ### Post-install login not loading?
 
