@@ -156,7 +156,12 @@ cat > /etc/caddy/Caddyfile << EOF
     persist_config on
 }
 
+:80 {
+    reverse_proxy 127.0.0.1:${PLATFORM_PORT}
+}
+
 :443 {
+    tls internal
     reverse_proxy 127.0.0.1:${PLATFORM_PORT}
 }
 EOF

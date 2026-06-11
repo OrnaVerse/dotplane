@@ -422,6 +422,7 @@ cat > /etc/caddy/Caddyfile << EOF
 }
 
 :443 {
+    tls internal
     reverse_proxy 127.0.0.1:${PLATFORM_PORT}
 }
 EOF
@@ -448,11 +449,42 @@ chmod 644 /etc/cron.d/dotplane-backup
 ok "Backup cron installed (daily 02:00, 30-day retention)"
 
 # ── 17. Start services ─────────────────────────────────────────────────────────
+wait_for_platform_health() {
+  local url="http://127.0.0.1:${PLATFORM_PORT}/${URL_KEY}/api/health"
+  for _ in $(seq 1 30); do
+    if curl -fsS --max-time 2 "$url" >/dev/null 2>&1; then
+      ok "Platform health check passed (${url})"
+      return 0
+    fi
+    sleep 1
+  done
+  warn "Platform not responding — check: journalctl -u dotplane -n 100 --no-pager"
+  return 1
+}
+
+verify_caddy_proxy() {
+  local url="http://127.0.0.1:80/${URL_KEY}/api/health"
+  if curl -fsS --max-time 2 "$url" >/dev/null 2>&1; then
+    ok "Caddy HTTP proxy check passed"
+    return 0
+  fi
+  warn "Caddy HTTP proxy failed — check: journalctl -u caddy -n 50 --no-pager"
+  return 1
+}
+
 systemctl daemon-reload
 systemctl enable dotplane 2>/dev/null || warn "Failed to enable dotplane service"
 systemctl enable caddy 2>/dev/null || warn "Failed to enable caddy service"
-systemctl start dotplane 2>/dev/null || warn "dotplane failed to start — check: journalctl -u dotplane -n 50"
-systemctl start caddy 2>/dev/null || warn "caddy failed to start — check: journalctl -u caddy -n 50"
+if ! systemctl restart dotplane; then
+  warn "dotplane failed to start — check: journalctl -u dotplane -n 50 --no-pager"
+else
+  wait_for_platform_health || true
+fi
+if ! systemctl restart caddy; then
+  warn "caddy failed to start — check: journalctl -u caddy -n 50 --no-pager"
+else
+  verify_caddy_proxy || true
+fi
 
 # ── 18. Install local agent ────────────────────────────────────────────────────
 log "Installing Agent on this server..."

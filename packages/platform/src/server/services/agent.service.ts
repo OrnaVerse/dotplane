@@ -91,7 +91,10 @@ function getDispatcher(): Agent {
         key: fs.readFileSync(requireEnv('MTLS_CLIENT_KEY_PATH')),
         ca: [fs.readFileSync(requireEnv('MTLS_CA_CERT_PATH'))],
         rejectUnauthorized: true,
+        timeout: 10_000,
       },
+      bodyTimeout: 30_000,
+      headersTimeout: 30_000,
     })
   }
   return sharedDispatcher
@@ -129,6 +132,7 @@ export class AgentService {
       },
       body: body !== undefined ? JSON.stringify(body) : undefined,
       dispatcher: getDispatcher(),
+      signal: AbortSignal.timeout(30_000),
     })
 
     if (!res.ok) {

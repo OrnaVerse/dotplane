@@ -12,7 +12,8 @@ export default defineConfig(({ mode }) => {
   return {
     root: __dirname,
     publicDir: path.resolve(__dirname, 'public'),
-    base: `/${urlKey}/`,
+    // Production uses relative assets — URL key comes from the browser path at runtime.
+    base: mode === 'production' ? './' : `/${urlKey}/`,
     plugins: [react()],
     server: {
       port: 5173,

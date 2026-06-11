@@ -1,6 +1,12 @@
 import express, { type NextFunction, type Request, type Response, type Router } from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url'
+
+function isDirectExecution(): boolean {
+  const entry = process.argv[1]
+  if (!entry) return false
+  return path.resolve(entry) === fileURLToPath(import.meta.url)
+}
 import helmet from 'helmet'
 import cookieParser from 'cookie-parser'
 import { pinoHttp } from 'pino-http'
@@ -122,18 +128,25 @@ async function boot(): Promise<void> {
   startHealthPoller()
   startPgHealthPoller()
 
-  const reconcile = await reconcileCaddyRoutes()
-  logger.info(reconcile, 'Startup reconciliation complete')
-
   const host = process.env.PLATFORM_HOST ?? '127.0.0.1'
   const port = Number.parseInt(process.env.PLATFORM_PORT ?? '58291', 10)
   const app = createApp()
 
-  app.listen(port, host, () => {
-    logger.info({ host, port, urlKey: requireEnv('PLATFORM_URL_KEY') }, 'Dotplane platform listening')
+  await new Promise<void>((resolve) => {
+    app.listen(port, host, () => {
+      logger.info({ host, port, urlKey: requireEnv('PLATFORM_URL_KEY') }, 'Dotplane platform listening')
+      resolve()
+    })
   })
+
+  void reconcileCaddyRoutes()
+    .then((reconcile) => logger.info(reconcile, 'Startup reconciliation complete'))
+    .catch((err: unknown) => {
+      const msg = err instanceof Error ? err.message : String(err)
+      logger.warn({ err: msg }, 'Startup Caddy reconciliation failed')
+    })
 }
 
-if (import.meta.url === `file://${process.argv[1]?.replace(/\\/g, '/')}`) {
+if (isDirectExecution()) {
   void boot()
 }

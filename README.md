@@ -45,7 +45,7 @@ Pin a specific version:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/OrnaVerse/dotplane/main/scripts/bootstrap-install.sh | \
-  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane DOTPLANE_VERSION=v0.1.14 bash
+  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane DOTPLANE_VERSION=v0.1.15 bash
 ```
 
 The bootstrap script downloads the pre-built release tarball, installs system dependencies (Node, Caddy, .NET, UFW, fail2ban), generates secrets, and starts services. Native modules compile on the target server during production dependency install.
@@ -161,5 +161,21 @@ sudo DOTPLANE_ENV_PATH=/opt/dotplane/.env node dist/server/cli.js show-access
 ```
 
 On cloud VMs (GCP, AWS, etc.), open the `PLATFORM_PORT` TCP port in your provider's firewall — UFW on the server is not enough.
+
+### Post-install login not loading?
+
+Use **HTTP** for the direct port URL (`http://IP:PORT/urlkey`), not HTTPS. Port 443/80 go through Caddy.
+
+```bash
+# On the server — check services and local health
+sudo systemctl status dotplane caddy
+sudo journalctl -u dotplane -n 100 --no-pager
+PORT=$(grep PLATFORM_PORT /opt/dotplane/.env | cut -d= -f2)
+KEY=$(grep PLATFORM_URL_KEY /opt/dotplane/.env | cut -d= -f2)
+curl -v "http://127.0.0.1:${PORT}/${KEY}/api/health"
+curl -v "http://127.0.0.1:80/${KEY}/api/health"
+```
+
+If local curls work but the browser times out, open `PLATFORM_PORT` plus ports 80 and 443 in your cloud firewall (e.g. GCP VPC → Firewall rules).
 
 See `docs/security.md` for hardening and secret rotation.
