@@ -30,7 +30,9 @@ ACCESS_FILE=""
 
 print_install_summary() {
   [[ "${SUMMARY_PRINTED}" == "1" ]] && return
+  # Skip summary entirely if secrets were never generated (very early failure)
   [[ -z "${URL_KEY:-}" ]] && return
+  [[ -z "${PLATFORM_PORT:-}" ]] && return
 
   local ip="${SERVER_IP:-}"
   if [[ -z "$ip" ]]; then
@@ -41,16 +43,20 @@ print_install_summary() {
   local panel_url="http://${ip}:${port}/${URL_KEY}"
   local https_url="https://${ip}/${URL_KEY}"
   ACCESS_FILE="${DOTPLANE_ROOT}/access.txt"
-  cat > "${ACCESS_FILE}" << EOF
+  if mkdir -p "${DOTPLANE_ROOT}" 2>/dev/null; then
+    cat > "${ACCESS_FILE}" << EOF
 Dotplane access — save this file securely
 Panel URL: ${panel_url}
 HTTPS URL (Caddy): ${https_url}
 Port: ${port}
 URL key: ${URL_KEY}
-Username: ${ADMIN_USER}
-Password: ${ADMIN_PASS}
+Username: ${ADMIN_USER:-unknown}
+Password: ${ADMIN_PASS:-unknown}
 EOF
-  chmod 600 "${ACCESS_FILE}"
+    chmod 600 "${ACCESS_FILE}"
+  else
+    ACCESS_FILE="(unavailable — ${DOTPLANE_ROOT} not yet created)"
+  fi
 
   echo ""
   echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${NC}"

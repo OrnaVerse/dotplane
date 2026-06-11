@@ -33,16 +33,17 @@ print_install_summary() {
   local panel_url="http://${ip}:${port}/${URL_KEY}"
   local https_url="https://${ip}/${URL_KEY}"
   local access_file="${DOTPLANE_ROOT}/access.txt"
+  mkdir -p "${DOTPLANE_ROOT}" 2>/dev/null || true
   cat > "${access_file}" << EOF
 Dotplane access — save this file securely
 Panel URL: ${panel_url}
 HTTPS URL (Caddy): ${https_url}
 Port: ${port}
 URL key: ${URL_KEY}
-Username: ${ADMIN_USER}
-Password: ${ADMIN_PASS}
+Username: ${ADMIN_USER:-unknown}
+Password: ${ADMIN_PASS:-unknown}
 EOF
-  chmod 600 "${access_file}"
+  chmod 600 "${access_file}" 2>/dev/null || true
 
   echo ""
   echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${NC}"
