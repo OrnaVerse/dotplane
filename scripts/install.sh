@@ -438,12 +438,77 @@ else
 fi
 
 # ── 15. Install local agent ────────────────────────────────────────────────────
-log "Installing Agent on this server..."
-if [[ -f "$CLI" ]]; then
-  DOTPLANE_ENV_PATH="${DOTPLANE_ROOT}/.env" DB_PATH="${DATA_DIR}/dotplane.db" \
-    "$NODE_BIN" "$CLI" install-local-agent 2>/dev/null || warn "install-local-agent skipped — register server via UI"
+log "Installing local agent on this server..."
+
+# Generate agent mTLS cert signed by the platform's CA
+if CERT_DIR="${DOTPLANE_ROOT}/certs" SERVER_ID=local HOSTNAME=127.0.0.1 \
+    bash "${DOTPLANE_ROOT}/scripts/generate-certs.sh" >/dev/null 2>&1; then
+  ok "Agent mTLS cert generated"
 else
-  warn "Register this server via the Platform UI after first login"
+  warn "Agent cert generation failed — agent connections may not work"
+fi
+
+# Callback token: agent uses this to POST /api/servers/internal/agent-online.
+# Key format matches agentTokenSettingKey() in servers.ts: agent_install:<sha256(token)>
+# Expiry set far in future — local agent is permanent, not a one-time install token.
+AGENT_CALLBACK_TOKEN="tok_$(openssl rand -hex 16)"
+AGENT_TOKEN_HASH=$(printf '%s' "${AGENT_CALLBACK_TOKEN}" | openssl dgst -sha256 | awk '{print $NF}')
+AGENT_TOKEN_KEY="agent_install:${AGENT_TOKEN_HASH}"
+AGENT_TOKEN_VALUE='{"serverId":"local","expiresAt":"2125-01-01T00:00:00.000Z"}'
+
+sqlite3 "${DATA_DIR}/dotplane.db" << SQL
+INSERT OR IGNORE INTO servers (id, display_name, hostname, agent_port, status, created_at)
+  VALUES ('local', 'Localhost', '127.0.0.1', 7823, 'pending', datetime('now'));
+INSERT OR REPLACE INTO settings (key, value, is_sensitive, updated_at)
+  VALUES ('${AGENT_TOKEN_KEY}', '${AGENT_TOKEN_VALUE}', 1, datetime('now'));
+SQL
+
+# Write the agent's .env — kept separate from platform .env
+LOCAL_AGENT_ENV="${DOTPLANE_ROOT}/.agent.env"
+AGENT_ENTRY="${DOTPLANE_ROOT}/packages/agent/dist/index.js"
+
+cat > "${LOCAL_AGENT_ENV}" << EOF
+PLATFORM_URL=http://127.0.0.1:${PLATFORM_PORT}/${URL_KEY}
+SERVER_ID=local
+AGENT_PORT=7823
+AGENT_HOST=127.0.0.1
+AGENT_CERT_PATH=${DOTPLANE_ROOT}/certs/agent.crt
+AGENT_KEY_PATH=${DOTPLANE_ROOT}/certs/agent.key
+CA_CERT_PATH=${DOTPLANE_ROOT}/certs/ca.crt
+AGENT_CALLBACK_TOKEN=${AGENT_CALLBACK_TOKEN}
+INSTANCES_ROOT=/var/dotplane/instances
+FNM_DIR=/usr/local/share/fnm
+DOTNET_INSTALL_DIR=/usr/share/dotnet
+EOF
+chmod 600 "${LOCAL_AGENT_ENV}"
+
+cat > /etc/systemd/system/dotplane-agent.service << EOF
+[Unit]
+Description=Dotplane Agent (local)
+After=network.target dotplane.service
+
+[Service]
+Type=simple
+WorkingDirectory=${DOTPLANE_ROOT}/packages/agent
+ExecStart=${NODE_BIN} ${AGENT_ENTRY}
+Restart=always
+RestartSec=5
+User=root
+EnvironmentFile=${LOCAL_AGENT_ENV}
+Environment=PATH=/usr/local/bin:/usr/share/dotnet:/usr/bin:/bin
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable dotplane-agent 2>/dev/null || warn "Failed to enable dotplane-agent"
+systemctl restart dotplane-agent 2>/dev/null || warn "dotplane-agent failed to start"
+sleep 2
+if systemctl is-active --quiet dotplane-agent; then
+  ok "Local agent running"
+else
+  warn "dotplane-agent not running — check: journalctl -u dotplane-agent -n 50 --no-pager"
 fi
 
 # ── 16. Done ───────────────────────────────────────────────────────────────────
