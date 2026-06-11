@@ -78,7 +78,12 @@ EOF
   echo -e "${GREEN}║           Dotplane Installed Successfully            ║${NC}"
   echo -e "${GREEN}╠══════════════════════════════════════════════════════╣${NC}"
   echo -e "${GREEN}║${NC}  Panel URL  : ${panel_url}"
-  echo -e "${GREEN}║${NC}  HTTPS URL   : ${https_url}"
+  if [[ -n "${DOMAIN:-}" ]]; then
+    echo -e "${GREEN}║${NC}  HTTPS URL   : ${https_url}"
+  else
+    echo -e "${GREEN}║${NC}  HTTP URL    : http://${ip}/${URL_KEY}  (use this — port 80 via Caddy)"
+    echo -e "${GREEN}║${NC}  HTTPS       : add DOTPLANE_DOMAIN=yourdomain.com for a trusted cert"
+  fi
   echo -e "${GREEN}║${NC}  Port        : ${port}"
   echo -e "${GREEN}║${NC}  URL key     : ${URL_KEY}"
   echo -e "${GREEN}║${NC}  Username   : ${ADMIN_USER}"

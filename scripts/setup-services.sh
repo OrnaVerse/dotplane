@@ -132,10 +132,10 @@ ${DOMAIN} {
 EOF
   ok "Caddyfile written for domain ${DOMAIN}"
 else
-  # IP-only: use Caddy's internal CA (self-signed). Browsers will show a
-  # "Your connection is not private" warning — click Advanced → Proceed.
-  # HTTP on port 80 works without any warning.
-  log "No DOTPLANE_DOMAIN set — using self-signed TLS (tls internal)..."
+  # IP-only: serve over HTTP only. Browsers hard-block HTTPS to bare IPs with
+  # self-signed certs (ERR_SSL_PROTOCOL_ERROR, no "proceed anyway" option).
+  # HTTPS becomes available once a real domain is configured (DOTPLANE_DOMAIN).
+  log "No DOTPLANE_DOMAIN set — serving over HTTP only (port 80)..."
   cat > /etc/caddy/Caddyfile << EOF
 {
     admin localhost:2019
@@ -144,14 +144,8 @@ else
 :80 {
     reverse_proxy 127.0.0.1:${PLATFORM_PORT}
 }
-
-:443 {
-    tls internal
-    reverse_proxy 127.0.0.1:${PLATFORM_PORT}
-    header Strict-Transport-Security "max-age=31536000; includeSubDomains"
-}
 EOF
-  ok "Caddyfile written (self-signed TLS — HTTP on port 80 is the recommended access method)"
+  ok "Caddyfile written (HTTP on port 80 — set DOTPLANE_DOMAIN for HTTPS)"
 fi
 
 if [[ ! -f /etc/cron.d/dotplane-backup ]]; then
