@@ -45,7 +45,7 @@ Pin a specific version:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/OrnaVerse/dotplane/main/scripts/bootstrap-install.sh | \
-  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane DOTPLANE_VERSION=v0.1.10 DOTPLANE_ADMIN_PASSWORD='your-secure-password' bash
+  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane DOTPLANE_VERSION=v0.1.11 DOTPLANE_ADMIN_PASSWORD='your-secure-password' bash
 ```
 
 The bootstrap script downloads the pre-built release tarball, installs system dependencies (Node, Caddy, .NET, UFW, fail2ban), generates secrets, and starts services. Native modules compile on the target server during production dependency install.
@@ -150,6 +150,14 @@ If a piped install stopped before showing credentials:
 
 ```bash
 sudo DOTPLANE_ADMIN_PASSWORD='your-secure-password' bash /opt/dotplane/scripts/finish-install.sh
+```
+
+Recover the panel URL from an existing install:
+
+```bash
+sudo grep PLATFORM_URL_KEY /opt/dotplane/.env
+curl -fsSL https://api.ipify.org   # your server IP → https://<IP>/<URL_KEY>
+sudo cat /opt/dotplane/access.txt  # written after successful password step (v0.1.11+)
 ```
 
 See `docs/security.md` for hardening and secret rotation.

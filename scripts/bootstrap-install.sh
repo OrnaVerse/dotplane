@@ -73,4 +73,10 @@ EXTRACTED="$(find "$TMP_DIR" -maxdepth 1 -type d -name 'dotplane-*' | head -1)"
   fail "Invalid release tarball — scripts/install.sh not found"
 
 log "Starting install..."
-exec bash "${EXTRACTED}/scripts/install.sh" --from-release "${EXTRACTED}"
+# Piped curl|bash has no usable stdin — attach the controlling terminal so prompts
+# and the final access summary are always visible.
+if [[ -r /dev/tty && -w /dev/tty ]]; then
+  exec bash "${EXTRACTED}/scripts/install.sh" --from-release "${EXTRACTED}" </dev/tty >/dev/tty 2>&1
+else
+  exec bash "${EXTRACTED}/scripts/install.sh" --from-release "${EXTRACTED}"
+fi

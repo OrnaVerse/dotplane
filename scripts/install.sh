@@ -25,6 +25,56 @@ ok()   { echo -e "${GREEN}[✓]${NC} $1"; }
 warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 fail() { echo -e "${RED}[✗]${NC} $1"; exit 1; }
 
+SUMMARY_PRINTED=0
+ACCESS_FILE=""
+
+print_install_summary() {
+  [[ "${SUMMARY_PRINTED}" == "1" ]] && return
+  [[ -z "${URL_KEY:-}" ]] && return
+
+  local ip="${SERVER_IP:-}"
+  if [[ -z "$ip" ]]; then
+    ip="$(curl -fsSL --max-time 5 https://api.ipify.org 2>/dev/null || hostname -I | awk '{print $1}')"
+  fi
+
+  local panel_url="https://${ip}/${URL_KEY}"
+  local pass_line
+  if [[ "${GENERATED_ADMIN_PASS:-0}" == "1" ]]; then
+    pass_line="${ADMIN_PASS}"
+  elif [[ -n "${DOTPLANE_ADMIN_PASSWORD:-}" ]]; then
+    pass_line="(from DOTPLANE_ADMIN_PASSWORD)"
+  else
+    pass_line="(the one you just set)"
+  fi
+
+  ACCESS_FILE="${DOTPLANE_ROOT}/access.txt"
+  cat > "${ACCESS_FILE}" << EOF
+Dotplane access — save this file securely
+Panel URL: ${panel_url}
+Username: admin
+Password: ${pass_line}
+EOF
+  chmod 600 "${ACCESS_FILE}"
+
+  echo ""
+  echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${NC}"
+  echo -e "${GREEN}║           Dotplane Installed Successfully            ║${NC}"
+  echo -e "${GREEN}╠══════════════════════════════════════════════════════╣${NC}"
+  echo -e "${GREEN}║${NC}  Panel URL  : ${panel_url}"
+  echo -e "${GREEN}║${NC}  URL key     : ${URL_KEY}"
+  echo -e "${GREEN}║${NC}  Username   : admin"
+  echo -e "${GREEN}║${NC}  Password   : ${pass_line}"
+  echo -e "${GREEN}║${NC}  Database   : ${DATA_DIR}/dotplane.db (SQLite)"
+  echo -e "${GREEN}║${NC}  Backups    : ${BACKUP_DIR}"
+  echo -e "${GREEN}║${NC}  Access file: ${ACCESS_FILE}"
+  echo -e "${GREEN}║${NC}"
+  echo -e "${GREEN}║${NC}  Save the URL — it won't be shown again"
+  echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${NC}"
+  SUMMARY_PRINTED=1
+}
+
+trap print_install_summary EXIT
+
 [[ $EUID -ne 0 ]] && fail "Run as root"
 [[ "$(uname -s)" != "Linux" ]] && fail "Linux only"
 
@@ -329,11 +379,17 @@ prompt_admin_password
 
 CLI="${DOTPLANE_ROOT}/packages/platform/dist/server/cli.js"
 if [[ -f "$CLI" ]]; then
-  DOTPLANE_ENV_PATH="${DOTPLANE_ROOT}/.env" DB_PATH="${DATA_DIR}/dotplane.db" \
-    "$NODE_BIN" "$CLI" set-password admin "$ADMIN_PASS"
+  if ! DOTPLANE_ENV_PATH="${DOTPLANE_ROOT}/.env" DB_PATH="${DATA_DIR}/dotplane.db" \
+    "$NODE_BIN" "$CLI" set-password admin "$ADMIN_PASS"; then
+    warn "Failed to set admin password — run: node ${CLI} set-password admin '...'"
+  else
+    ok "Admin password configured"
+  fi
 else
   warn "Platform CLI not found — set admin password via UI on first login"
 fi
+
+print_install_summary
 
 # ── 14. Install systemd units ──────────────────────────────────────────────────
 log "Installing systemd units..."
@@ -397,31 +453,19 @@ ok "Backup cron installed (daily 02:00, 30-day retention)"
 
 # ── 17. Start services ─────────────────────────────────────────────────────────
 systemctl daemon-reload
-systemctl enable dotplane caddy
-systemctl start dotplane caddy
+systemctl enable dotplane 2>/dev/null || warn "Failed to enable dotplane service"
+systemctl enable caddy 2>/dev/null || warn "Failed to enable caddy service"
+systemctl start dotplane 2>/dev/null || warn "dotplane failed to start — check: journalctl -u dotplane -n 50"
+systemctl start caddy 2>/dev/null || warn "caddy failed to start — check: journalctl -u caddy -n 50"
 
 # ── 18. Install local agent ────────────────────────────────────────────────────
 log "Installing Agent on this server..."
 if [[ -f "$CLI" ]]; then
-  "$NODE_BIN" "$CLI" install-local-agent 2>/dev/null || warn "install-local-agent skipped — register server via UI"
+  DOTPLANE_ENV_PATH="${DOTPLANE_ROOT}/.env" DB_PATH="${DATA_DIR}/dotplane.db" \
+    "$NODE_BIN" "$CLI" install-local-agent 2>/dev/null || warn "install-local-agent skipped — register server via UI"
 else
   warn "Register this server via the Platform UI after first login"
 fi
 
-# ── 19. Done ───────────────────────────────────────────────────────────────────
-echo ""
-echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║           Dotplane Installed Successfully            ║${NC}"
-echo -e "${GREEN}╠══════════════════════════════════════════════════════╣${NC}"
-echo -e "${GREEN}║${NC}  Panel URL  : https://${SERVER_IP}/${URL_KEY}"
-echo -e "${GREEN}║${NC}  Username   : admin"
-if [[ "${GENERATED_ADMIN_PASS:-0}" == "1" ]]; then
-  echo -e "${GREEN}║${NC}  Password   : ${ADMIN_PASS}"
-else
-  echo -e "${GREEN}║${NC}  Password   : (the one you just set)"
-fi
-echo -e "${GREEN}║${NC}  Database   : ${DATA_DIR}/dotplane.db (SQLite)"
-echo -e "${GREEN}║${NC}  Backups    : ${BACKUP_DIR}"
-echo -e "${GREEN}║${NC}"
-echo -e "${GREEN}║${NC}  Save the URL — it won't be shown again"
-echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${NC}"
+# ── 19. Done (summary printed after password; EXIT trap is a fallback) ─────────
+print_install_summary

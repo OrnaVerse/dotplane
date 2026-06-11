@@ -18,6 +18,53 @@ ok()   { echo -e "${GREEN}[✓]${NC} $1"; }
 warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 fail() { echo -e "${RED}[✗]${NC} $1"; exit 1; }
 
+SUMMARY_PRINTED=0
+
+print_install_summary() {
+  [[ "${SUMMARY_PRINTED}" == "1" ]] && return
+  [[ -z "${URL_KEY:-}" ]] && return
+
+  local ip="${SERVER_IP:-}"
+  if [[ -z "$ip" ]]; then
+    ip="$(curl -fsSL --max-time 5 https://api.ipify.org 2>/dev/null || hostname -I | awk '{print $1}')"
+  fi
+
+  local panel_url="https://${ip}/${URL_KEY}"
+  local pass_line
+  if [[ "${GENERATED_ADMIN_PASS:-0}" == "1" ]]; then
+    pass_line="${ADMIN_PASS}"
+  elif [[ -n "${DOTPLANE_ADMIN_PASSWORD:-}" ]]; then
+    pass_line="(from DOTPLANE_ADMIN_PASSWORD)"
+  else
+    pass_line="(the one you just set)"
+  fi
+
+  local access_file="${DOTPLANE_ROOT}/access.txt"
+  cat > "${access_file}" << EOF
+Dotplane access — save this file securely
+Panel URL: ${panel_url}
+Username: admin
+Password: ${pass_line}
+EOF
+  chmod 600 "${access_file}"
+
+  echo ""
+  echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${NC}"
+  echo -e "${GREEN}║           Dotplane Installed Successfully            ║${NC}"
+  echo -e "${GREEN}╠══════════════════════════════════════════════════════╣${NC}"
+  echo -e "${GREEN}║${NC}  Panel URL  : ${panel_url}"
+  echo -e "${GREEN}║${NC}  URL key     : ${URL_KEY}"
+  echo -e "${GREEN}║${NC}  Username   : admin"
+  echo -e "${GREEN}║${NC}  Password   : ${pass_line}"
+  echo -e "${GREEN}║${NC}  Access file: ${access_file}"
+  echo -e "${GREEN}║${NC}"
+  echo -e "${GREEN}║${NC}  Save the URL — it won't be shown again"
+  echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${NC}"
+  SUMMARY_PRINTED=1
+}
+
+trap print_install_summary EXIT
+
 [[ $EUID -ne 0 ]] && fail "Run as root"
 
 DOTPLANE_ROOT="${DOTPLANE_ROOT:-/opt/dotplane}"
@@ -79,9 +126,14 @@ export DB_PATH="${DB_PATH:-${DATA_DIR}/dotplane.db}"
 ok "Database migrations complete"
 
 prompt_admin_password
-DOTPLANE_ENV_PATH="$ENV_FILE" DB_PATH="${DB_PATH}" \
-  "$NODE_BIN" "$CLI" set-password admin "$ADMIN_PASS"
-ok "Admin credentials configured"
+if ! DOTPLANE_ENV_PATH="$ENV_FILE" DB_PATH="${DB_PATH}" \
+  "$NODE_BIN" "$CLI" set-password admin "$ADMIN_PASS"; then
+  warn "Failed to set admin password — run: node ${CLI} set-password admin '...'"
+else
+  ok "Admin credentials configured"
+fi
+
+print_install_summary
 
 log "Installing systemd units..."
 PLATFORM_ENTRY="${DOTPLANE_ROOT}/packages/platform/dist/server/index.js"
@@ -140,26 +192,13 @@ EOF
 chmod 644 /etc/cron.d/dotplane-backup
 
 systemctl daemon-reload
-systemctl enable dotplane caddy
-systemctl restart dotplane caddy
+systemctl enable dotplane 2>/dev/null || warn "Failed to enable dotplane service"
+systemctl enable caddy 2>/dev/null || warn "Failed to enable caddy service"
+systemctl restart dotplane 2>/dev/null || warn "dotplane failed to start — check: journalctl -u dotplane -n 50"
+systemctl restart caddy 2>/dev/null || warn "caddy failed to start — check: journalctl -u caddy -n 50"
 ok "Services started"
 
 DOTPLANE_ENV_PATH="$ENV_FILE" DB_PATH="${DB_PATH}" \
   "$NODE_BIN" "$CLI" install-local-agent 2>/dev/null || warn "install-local-agent skipped"
 
-echo ""
-echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║           Dotplane Installed Successfully            ║${NC}"
-echo -e "${GREEN}╠══════════════════════════════════════════════════════╣${NC}"
-echo -e "${GREEN}║${NC}  Panel URL  : https://${SERVER_IP}/${URL_KEY}"
-echo -e "${GREEN}║${NC}  Username   : admin"
-if [[ "${GENERATED_ADMIN_PASS:-0}" == "1" ]]; then
-  echo -e "${GREEN}║${NC}  Password   : ${ADMIN_PASS}"
-else
-  echo -e "${GREEN}║${NC}  Password   : (the one you just set)"
-fi
-echo -e "${GREEN}║${NC}  Database   : ${DATA_DIR}/dotplane.db (SQLite)"
-echo -e "${GREEN}║${NC}  Backups    : ${BACKUP_DIR}"
-echo -e "${GREEN}║${NC}"
-echo -e "${GREEN}║${NC}  Save the URL — it won't be shown again"
-echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${NC}"
+print_install_summary
