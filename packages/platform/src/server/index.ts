@@ -66,7 +66,28 @@ export function createApp(): express.Application {
 
   app.set('trust proxy', 1)
   app.use(urlKeyMiddleware)
-  app.use(helmet({ contentSecurityPolicy: process.env.NODE_ENV === 'production' }))
+  app.use(
+    helmet({
+      contentSecurityPolicy:
+        process.env.NODE_ENV === 'production'
+          ? {
+              directives: {
+                ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+                // upgrade-insecure-requests rewrites every HTTP asset URL to HTTPS.
+                // This breaks the app when accessed over plain HTTP (direct port or
+                // Caddy HTTP proxy) because assets then try to load over HTTPS which
+                // may be unavailable or self-signed. Remove it; Caddy enforces HTTPS
+                // at the edge for deployments that have a real domain + cert.
+                'upgrade-insecure-requests': null,
+              },
+            }
+          : false,
+      // Sending HSTS over HTTP permanently poisons the browser's HSTS cache so
+      // plain-HTTP access breaks even after the header is removed. Let Caddy add
+      // Strict-Transport-Security only on HTTPS responses instead.
+      hsts: false,
+    }),
+  )
   app.use(express.json({ limit: '10mb' }))
   app.use(express.urlencoded({ extended: true }))
   app.use(cookieParser())

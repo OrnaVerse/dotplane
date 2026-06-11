@@ -126,6 +126,7 @@ cat > /etc/caddy/Caddyfile << EOF
 :443 {
     tls internal
     reverse_proxy 127.0.0.1:${PLATFORM_PORT}
+    header Strict-Transport-Security "max-age=31536000; includeSubDomains"
 }
 EOF
 ok "Caddyfile written for platform port ${PLATFORM_PORT}"
