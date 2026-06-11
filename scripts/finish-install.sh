@@ -67,6 +67,9 @@ prompt_admin_password() {
 
 GENERATED_ADMIN_PASS=0
 
+mkdir -p "$DATA_DIR" "$BACKUP_DIR"
+chmod 700 "$DATA_DIR" "$BACKUP_DIR"
+
 log "Running database migrations..."
 cd "${DOTPLANE_ROOT}/packages/platform"
 export DOTPLANE_ENV_PATH="$ENV_FILE"

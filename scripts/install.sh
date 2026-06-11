@@ -223,6 +223,10 @@ else
   fail "No source found. Use bootstrap-install.sh, set DOTPLANE_RELEASE_URL, or run from a git checkout."
 fi
 
+# Release rsync uses --delete and wipes runtime dirs not in the tarball (e.g. data/).
+mkdir -p "$DATA_DIR" "$BACKUP_DIR"
+chmod 700 "$DATA_DIR" "$BACKUP_DIR"
+
 mkdir -p "${DOTPLANE_ROOT}/scripts"
 cp "${DOTPLANE_ROOT}/scripts/generate-certs.sh" "${DOTPLANE_ROOT}/scripts/" 2>/dev/null \
   || cp "$SCRIPT_DIR/generate-certs.sh" "${DOTPLANE_ROOT}/scripts/"
