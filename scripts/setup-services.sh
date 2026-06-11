@@ -109,7 +109,8 @@ ok "systemd unit written"
 log "Configuring Caddy..."
 mkdir -p /etc/caddy /var/lib/caddy
 if ! id caddy >/dev/null 2>&1; then
-  useradd -r -s /bin/false caddy 2>/dev/null || true
+  useradd -r -s /bin/false -d /var/lib/caddy caddy 2>/dev/null || \
+    usermod -d /var/lib/caddy caddy 2>/dev/null || true
 fi
 chown -R caddy:caddy /var/lib/caddy 2>/dev/null || true
 

@@ -75,7 +75,8 @@ AmbientCapabilities=CAP_NET_BIND_SERVICE
 [Install]
 WantedBy=multi-user.target
 EOF
-  useradd -r -s /bin/false caddy 2>/dev/null || true
+  useradd -r -s /bin/false -d /var/lib/caddy caddy 2>/dev/null || \
+    usermod -d /var/lib/caddy caddy 2>/dev/null || true
   mkdir -p /etc/caddy /var/lib/caddy
   chown -R caddy:caddy /var/lib/caddy
 

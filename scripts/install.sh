@@ -211,7 +211,8 @@ Restart=on-failure
 WantedBy=multi-user.target
 EOF
 
-useradd -r -s /bin/false caddy 2>/dev/null || true
+useradd -r -s /bin/false -d /var/lib/caddy caddy 2>/dev/null || \
+  usermod -d /var/lib/caddy caddy 2>/dev/null || true
 mkdir -p /etc/caddy /var/lib/caddy
 chown -R caddy:caddy /var/lib/caddy
 ok "Caddy $(caddy version | head -1)"
