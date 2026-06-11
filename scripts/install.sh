@@ -162,8 +162,12 @@ case "$ARCH" in
   aarch64) CADDY_ARCH="arm64" ;;
   *)       fail "Unsupported architecture: $ARCH" ;;
 esac
-curl -fsSL "https://caddyserver.com/api/download?os=linux&arch=${CADDY_ARCH}" \
-  -o /usr/local/bin/caddy
+if ! curl -fsSL --max-time 60 "https://caddyserver.com/api/download?os=linux&arch=${CADDY_ARCH}" \
+  -o /usr/local/bin/caddy; then
+  warn "Caddy download failed — retrying..."
+  curl -fsSL --max-time 120 "https://caddyserver.com/api/download?os=linux&arch=${CADDY_ARCH}" \
+    -o /usr/local/bin/caddy || fail "Caddy download failed after retry"
+fi
 chmod +x /usr/local/bin/caddy
 
 cat > /etc/systemd/system/caddy.service << 'EOF'
@@ -190,11 +194,15 @@ ok "Caddy $(caddy version | head -1)"
 
 # ── 4. .NET SDK ────────────────────────────────────────────────────────────────
 log "Installing .NET 8 SDK..."
-curl -fsSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh
-chmod +x /tmp/dotnet-install.sh
-/tmp/dotnet-install.sh --channel 8.0 --install-dir /usr/share/dotnet --no-path
-ln -sf /usr/share/dotnet/dotnet /usr/local/bin/dotnet 2>/dev/null || true
-ok ".NET $(/usr/share/dotnet/dotnet --version)"
+if ! curl -fsSL --max-time 120 https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh; then
+  warn ".NET install script download failed — skipping .NET install"
+else
+  chmod +x /tmp/dotnet-install.sh
+  /tmp/dotnet-install.sh --channel 8.0 --install-dir /usr/share/dotnet --no-path \
+    || warn ".NET install failed — .NET apps will not run until manually installed"
+  ln -sf /usr/share/dotnet/dotnet /usr/local/bin/dotnet 2>/dev/null || true
+  ok ".NET $(/usr/share/dotnet/dotnet --version 2>/dev/null || echo '(version check failed)')"
+fi
 
 # ── 5. Firewall (UFW) ────────────────────────────────────────────────────────
 log "Configuring UFW..."
@@ -209,6 +217,7 @@ ok "UFW enabled (22, 80, 443)"
 
 # ── 6. fail2ban ──────────────────────────────────────────────────────────────
 log "Configuring fail2ban..."
+mkdir -p /etc/fail2ban/jail.d
 cat > /etc/fail2ban/jail.d/dotplane.conf << 'EOF'
 [DEFAULT]
 bantime  = 1h
@@ -223,11 +232,11 @@ logpath = /var/log/auth.log
 maxretry = 5
 bantime  = 1h
 EOF
-systemctl enable fail2ban
-systemctl restart fail2ban
+systemctl enable fail2ban 2>/dev/null || true
+systemctl restart fail2ban 2>/dev/null || warn "fail2ban failed to restart — continuing"
 ok "fail2ban configured for SSH"
 
-# ── 7. Generate secrets ────────────────────────────────────────────────────────
+# ── 7. Generate secrets + admin credentials ────────────────────────────────────
 log "Generating secrets..."
 PLATFORM_PORT=$(shuf -i 49152-65535 -n 1)
 ufw allow "${PLATFORM_PORT}/tcp" >/dev/null 2>&1 || true
@@ -237,99 +246,27 @@ REFRESH_SECRET=$(openssl rand -hex 64)
 CSRF_SECRET=$(openssl rand -hex 32)
 ENCRYPTION_KEY=$(openssl rand -hex 32)
 
-# ── 8. Directory layout ────────────────────────────────────────────────────────
+if [[ -n "${DOTPLANE_ADMIN_USERNAME:-}" ]]; then
+  ADMIN_USER="$DOTPLANE_ADMIN_USERNAME"
+else
+  ADMIN_USER="$(generate_dotplane_admin_username)"
+fi
+
+if [[ -n "${DOTPLANE_ADMIN_PASSWORD:-}" ]]; then
+  ADMIN_PASS="$DOTPLANE_ADMIN_PASSWORD"
+else
+  ADMIN_PASS="$(generate_dotplane_admin_password)"
+fi
+
+# ── 8. Directories + write .env FIRST (before rsync/deps/certs) ────────────────
+# .env must exist before any step that can fail, so that finish-install.sh and
+# setup-services.sh can resume from a partial install without a full re-run.
 log "Creating directories..."
 mkdir -p "$DOTPLANE_ROOT" "$DATA_DIR" "$BACKUP_DIR" "$ARTIFACTS_DIR" "$INSTANCES_DIR" "$LOG_DIR"
 mkdir -p "${DOTPLANE_ROOT}/certs" "${DOTPLANE_ROOT}/scripts"
 chmod 700 "$DOTPLANE_ROOT" "${DOTPLANE_ROOT}/certs" "$DATA_DIR" "$BACKUP_DIR"
 
-# ── Deploy application files ───────────────────────────────────────────────────
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-
-if [[ -n "$FROM_RELEASE" && -d "$FROM_RELEASE" ]]; then
-  log "Installing from release bundle..."
-  rsync -a --delete "$FROM_RELEASE/" "$DOTPLANE_ROOT/"
-  DOTPLANE_SKIP_BUILD=1
-elif [[ -n "${DOTPLANE_RELEASE_URL:-}" ]]; then
-  log "Downloading release from ${DOTPLANE_RELEASE_URL}..."
-  TMP_TAR="$(mktemp)"
-  curl -fsSL "$DOTPLANE_RELEASE_URL" -o "$TMP_TAR"
-  mkdir -p "$DOTPLANE_ROOT"
-  tar -xzf "$TMP_TAR" -C "$(dirname "$DOTPLANE_ROOT")"
-  rm -f "$TMP_TAR"
-  # Tarball extracts as dotplane-{version}-linux-{arch}/ — move contents up
-  BUNDLE="$(find "$(dirname "$DOTPLANE_ROOT")" -maxdepth 1 -type d -name 'dotplane-*-linux-*' | sort -r | head -1)"
-  if [[ -n "$BUNDLE" && "$BUNDLE" != "$DOTPLANE_ROOT" ]]; then
-    rsync -a "$BUNDLE/" "$DOTPLANE_ROOT/"
-    rm -rf "$BUNDLE"
-  fi
-  DOTPLANE_SKIP_BUILD=1
-elif [[ -f "$REPO_ROOT/package.json" ]]; then
-  log "Copying Dotplane source from checkout to ${DOTPLANE_ROOT}..."
-  rsync -a --exclude node_modules --exclude dist --exclude .git \
-    "$REPO_ROOT/" "$DOTPLANE_ROOT/"
-else
-  fail "No source found. Use bootstrap-install.sh, set DOTPLANE_RELEASE_URL, or run from a git checkout."
-fi
-
-# Release rsync uses --delete and wipes runtime dirs not in the tarball (e.g. data/).
-mkdir -p "$DATA_DIR" "$BACKUP_DIR"
-chmod 700 "$DATA_DIR" "$BACKUP_DIR"
-
-mkdir -p "${DOTPLANE_ROOT}/scripts"
-cp "${DOTPLANE_ROOT}/scripts/generate-certs.sh" "${DOTPLANE_ROOT}/scripts/" 2>/dev/null \
-  || cp "$SCRIPT_DIR/generate-certs.sh" "${DOTPLANE_ROOT}/scripts/"
-chmod +x "${DOTPLANE_ROOT}/scripts/generate-certs.sh"
-
-# ── 9. Generate mTLS certs ─────────────────────────────────────────────────────
-log "Generating mTLS certificates..."
-CERT_DIR="${DOTPLANE_ROOT}/certs" bash "${DOTPLANE_ROOT}/scripts/generate-certs.sh"
-chmod 700 "${DOTPLANE_ROOT}/certs"
-chmod 600 "${DOTPLANE_ROOT}/certs"/*.key
-ok "mTLS certs generated"
-
-# ── 10. Install Platform dependencies & build ──────────────────────────────────
-cd "$DOTPLANE_ROOT"
-PLATFORM_ENTRY="${DOTPLANE_ROOT}/packages/platform/dist/server/index.js"
-AGENT_ENTRY="${DOTPLANE_ROOT}/packages/agent/dist/index.js"
-
-if [[ "$DOTPLANE_SKIP_BUILD" == "1" && -f "$PLATFORM_ENTRY" && -f "$AGENT_ENTRY" ]]; then
-  log "Using pre-built release artifacts — installing production dependencies..."
-  install_release_dependencies
-  ok "Production dependencies installed"
-else
-  log "Building Dotplane Platform from source..."
-  ensure_pnpm
-  if command -v pnpm >/dev/null 2>&1; then
-    pnpm install --frozen-lockfile 2>/dev/null || pnpm install
-    pnpm --filter @dotplane/platform build
-    pnpm --filter @dotplane/agent build
-  else
-    "$NPM_BIN" install
-    "$NPM_BIN" run build --workspace=@dotplane/platform 2>/dev/null || (cd packages/platform && "$NPM_BIN" install && "$NPM_BIN" run build)
-    "$NPM_BIN" run build --workspace=@dotplane/agent 2>/dev/null || (cd packages/agent && "$NPM_BIN" install && "$NPM_BIN" run build)
-  fi
-fi
-
-# ── 10b. Generate admin credentials ────────────────────────────────────────────
-if [[ -n "${DOTPLANE_ADMIN_USERNAME:-}" ]]; then
-  ADMIN_USER="$DOTPLANE_ADMIN_USERNAME"
-  ok "Using admin username from DOTPLANE_ADMIN_USERNAME"
-else
-  ADMIN_USER="$(generate_dotplane_admin_username)"
-  ok "Generated random admin username (shown in summary below)"
-fi
-
-if [[ -n "${DOTPLANE_ADMIN_PASSWORD:-}" ]]; then
-  ADMIN_PASS="$DOTPLANE_ADMIN_PASSWORD"
-  ok "Using admin password from DOTPLANE_ADMIN_PASSWORD"
-else
-  ADMIN_PASS="$(generate_dotplane_admin_password)"
-  ok "Generated random 12-character admin password (shown in summary below)"
-fi
-
-# ── 11. Write .env ─────────────────────────────────────────────────────────────
+log "Writing .env..."
 cat > "${DOTPLANE_ROOT}/.env" << EOF
 NODE_ENV=production
 PLATFORM_PORT=${PLATFORM_PORT}
@@ -353,6 +290,82 @@ MTLS_CLIENT_CERT_PATH=${DOTPLANE_ROOT}/certs/platform.crt
 MTLS_CLIENT_KEY_PATH=${DOTPLANE_ROOT}/certs/platform.key
 EOF
 chmod 600 "${DOTPLANE_ROOT}/.env"
+ok ".env written"
+
+# ── 9. Deploy application files ────────────────────────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+if [[ -n "$FROM_RELEASE" && -d "$FROM_RELEASE" ]]; then
+  log "Installing from release bundle..."
+  rsync -a --delete --exclude='.env' --exclude='data' --exclude='certs' \
+    "$FROM_RELEASE/" "$DOTPLANE_ROOT/"
+  DOTPLANE_SKIP_BUILD=1
+elif [[ -n "${DOTPLANE_RELEASE_URL:-}" ]]; then
+  log "Downloading release from ${DOTPLANE_RELEASE_URL}..."
+  TMP_TAR="$(mktemp)"
+  curl -fsSL "$DOTPLANE_RELEASE_URL" -o "$TMP_TAR"
+  mkdir -p "$DOTPLANE_ROOT"
+  tar -xzf "$TMP_TAR" -C "$(dirname "$DOTPLANE_ROOT")"
+  rm -f "$TMP_TAR"
+  BUNDLE="$(find "$(dirname "$DOTPLANE_ROOT")" -maxdepth 1 -type d -name 'dotplane-*-linux-*' | sort -r | head -1)"
+  if [[ -n "$BUNDLE" && "$BUNDLE" != "$DOTPLANE_ROOT" ]]; then
+    rsync -a --exclude='.env' --exclude='data' --exclude='certs' "$BUNDLE/" "$DOTPLANE_ROOT/"
+    rm -rf "$BUNDLE"
+  fi
+  DOTPLANE_SKIP_BUILD=1
+elif [[ -f "$REPO_ROOT/package.json" ]]; then
+  log "Copying Dotplane source from checkout to ${DOTPLANE_ROOT}..."
+  rsync -a --exclude node_modules --exclude dist --exclude .git \
+    --exclude='.env' --exclude='data' --exclude='certs' \
+    "$REPO_ROOT/" "$DOTPLANE_ROOT/"
+else
+  fail "No source found. Use bootstrap-install.sh, set DOTPLANE_RELEASE_URL, or run from a git checkout."
+fi
+
+# Ensure runtime dirs survive any rsync
+mkdir -p "$DATA_DIR" "$BACKUP_DIR"
+chmod 700 "$DATA_DIR" "$BACKUP_DIR"
+
+mkdir -p "${DOTPLANE_ROOT}/scripts"
+cp "${DOTPLANE_ROOT}/scripts/generate-certs.sh" "${DOTPLANE_ROOT}/scripts/" 2>/dev/null \
+  || cp "$SCRIPT_DIR/generate-certs.sh" "${DOTPLANE_ROOT}/scripts/"
+chmod +x "${DOTPLANE_ROOT}/scripts/generate-certs.sh"
+
+# ── 10. Generate mTLS certs ────────────────────────────────────────────────────
+log "Generating mTLS certificates..."
+if ! CERT_DIR="${DOTPLANE_ROOT}/certs" bash "${DOTPLANE_ROOT}/scripts/generate-certs.sh"; then
+  warn "mTLS cert generation failed — agent connections will not work until certs are created"
+else
+  chmod 700 "${DOTPLANE_ROOT}/certs"
+  chmod 600 "${DOTPLANE_ROOT}/certs"/*.key 2>/dev/null || true
+  ok "mTLS certs generated"
+fi
+
+# ── 11. Install Platform dependencies & build ──────────────────────────────────
+cd "$DOTPLANE_ROOT"
+PLATFORM_ENTRY="${DOTPLANE_ROOT}/packages/platform/dist/server/index.js"
+AGENT_ENTRY="${DOTPLANE_ROOT}/packages/agent/dist/index.js"
+
+if [[ "$DOTPLANE_SKIP_BUILD" == "1" && -f "$PLATFORM_ENTRY" && -f "$AGENT_ENTRY" ]]; then
+  log "Using pre-built release artifacts — installing production dependencies..."
+  install_release_dependencies
+  ok "Production dependencies installed"
+else
+  log "Building Dotplane Platform from source..."
+  ensure_pnpm
+  if command -v pnpm >/dev/null 2>&1; then
+    pnpm install --frozen-lockfile 2>/dev/null || pnpm install
+    pnpm --filter @dotplane/platform build
+    pnpm --filter @dotplane/agent build
+  else
+    "$NPM_BIN" install
+    "$NPM_BIN" run build --workspace=@dotplane/platform 2>/dev/null \
+      || (cd packages/platform && "$NPM_BIN" install && "$NPM_BIN" run build)
+    "$NPM_BIN" run build --workspace=@dotplane/agent 2>/dev/null \
+      || (cd packages/agent && "$NPM_BIN" install && "$NPM_BIN" run build)
+  fi
+fi
 
 # ── 12. Run database migrations ────────────────────────────────────────────────
 log "Running database migrations..."

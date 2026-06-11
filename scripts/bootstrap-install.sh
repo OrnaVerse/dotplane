@@ -84,12 +84,23 @@ else
     || INSTALL_RC=$?
 fi
 
-# Fallback when install is interrupted after files are deployed but before systemd setup
-SETUP_SCRIPT="/opt/dotplane/scripts/setup-services.sh"
-[[ -f "$SETUP_SCRIPT" ]] || SETUP_SCRIPT="${EXTRACTED}/scripts/setup-services.sh"
-if [[ ! -f /etc/systemd/system/dotplane.service && -f "$SETUP_SCRIPT" ]]; then
-  log "Install stopped before systemd setup — running setup-services..."
-  bash "$SETUP_SCRIPT" || INSTALL_RC=$?
+# Recovery fallback for partial installs
+ENV_FILE="/opt/dotplane/.env"
+SERVICE_FILE="/etc/systemd/system/dotplane.service"
+
+if [[ "$INSTALL_RC" -ne 0 ]] || [[ ! -f "$SERVICE_FILE" ]]; then
+  if [[ ! -f "$ENV_FILE" ]]; then
+    # .env never written — install died in the first few steps; re-run install
+    log "Install stopped before .env was written — retrying install..."
+    bash "${EXTRACTED}/scripts/install.sh" --from-release "${EXTRACTED}" \
+      || INSTALL_RC=$?
+  elif [[ ! -f "$SERVICE_FILE" ]]; then
+    # .env exists but systemd not configured — just wire up services
+    SETUP_SCRIPT="${ENV_FILE%/.env}/scripts/setup-services.sh"
+    [[ -f "$SETUP_SCRIPT" ]] || SETUP_SCRIPT="${EXTRACTED}/scripts/setup-services.sh"
+    log "Install stopped before systemd setup — running setup-services..."
+    bash "$SETUP_SCRIPT" || INSTALL_RC=$?
+  fi
 fi
 
 exit "$INSTALL_RC"
