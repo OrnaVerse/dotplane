@@ -61,6 +61,45 @@ log "Installing Node.js ${NODE_VERSION} via fnm..."
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/install-fnm.sh"
 install_dotplane_node "$NODE_VERSION"
 ok "Node $($NODE_BIN --version) via fnm"
+NPM_BIN="$(dirname "$NODE_BIN")/npm"
+export PATH="$(dirname "$NODE_BIN"):/usr/local/bin:${PATH}"
+
+ensure_pnpm() {
+  if command -v pnpm >/dev/null 2>&1; then
+    return 0
+  fi
+  log "Enabling pnpm for workspace install..."
+  if command -v corepack >/dev/null 2>&1; then
+    corepack enable
+    corepack prepare pnpm@9 --activate
+  else
+    "$NPM_BIN" install -g pnpm@9
+  fi
+  export PATH="$(dirname "$NODE_BIN"):$PATH"
+}
+
+install_release_dependencies() {
+  ensure_pnpm
+  if command -v pnpm >/dev/null 2>&1; then
+    pnpm install --prod --frozen-lockfile 2>/dev/null || pnpm install --prod
+    return
+  fi
+  warn "pnpm unavailable — installing per-package with npm"
+  for pkg in platform agent; do
+    "$NODE_BIN" -e "
+      const fs = require('fs');
+      const p = process.argv[1];
+      const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+      if (j.dependencies?.['@dotplane/shared']?.startsWith('workspace:')) {
+        j.dependencies['@dotplane/shared'] = 'file:../shared';
+        fs.writeFileSync(p, JSON.stringify(j, null, 2) + '\n');
+      }
+    " "${DOTPLANE_ROOT}/packages/${pkg}/package.json"
+  done
+  (cd "${DOTPLANE_ROOT}/packages/shared" && "$NPM_BIN" install --omit=dev)
+  (cd "${DOTPLANE_ROOT}/packages/platform" && "$NPM_BIN" install --omit=dev)
+  (cd "${DOTPLANE_ROOT}/packages/agent" && "$NPM_BIN" install --omit=dev)
+}
 
 # ── 3. Caddy (prebuilt binary) ─────────────────────────────────────────────────
 # NOTE: For custom Caddy modules (e.g. cloudflare DNS), build with xcaddy instead:
@@ -161,6 +200,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 if [[ -n "$FROM_RELEASE" && -d "$FROM_RELEASE" ]]; then
   log "Installing from release bundle..."
   rsync -a --delete "$FROM_RELEASE/" "$DOTPLANE_ROOT/"
+  DOTPLANE_SKIP_BUILD=1
 elif [[ -n "${DOTPLANE_RELEASE_URL:-}" ]]; then
   log "Downloading release from ${DOTPLANE_RELEASE_URL}..."
   TMP_TAR="$(mktemp)"
@@ -202,23 +242,19 @@ AGENT_ENTRY="${DOTPLANE_ROOT}/packages/agent/dist/index.js"
 
 if [[ "$DOTPLANE_SKIP_BUILD" == "1" && -f "$PLATFORM_ENTRY" && -f "$AGENT_ENTRY" ]]; then
   log "Using pre-built release artifacts — installing production dependencies..."
-  if command -v pnpm >/dev/null 2>&1; then
-    pnpm install --prod --frozen-lockfile 2>/dev/null || pnpm install --prod
-  else
-    npm install --omit=dev --workspace=@dotplane/platform --workspace=@dotplane/agent 2>/dev/null \
-      || (cd packages/platform && npm install --omit=dev && cd ../agent && npm install --omit=dev)
-  fi
+  install_release_dependencies
   ok "Production dependencies installed"
 else
   log "Building Dotplane Platform from source..."
+  ensure_pnpm
   if command -v pnpm >/dev/null 2>&1; then
     pnpm install --frozen-lockfile 2>/dev/null || pnpm install
     pnpm --filter @dotplane/platform build
     pnpm --filter @dotplane/agent build
   else
-    npm install
-    npm run build --workspace=@dotplane/platform 2>/dev/null || (cd packages/platform && npm install && npm run build)
-    npm run build --workspace=@dotplane/agent 2>/dev/null || (cd packages/agent && npm install && npm run build)
+    "$NPM_BIN" install
+    "$NPM_BIN" run build --workspace=@dotplane/platform 2>/dev/null || (cd packages/platform && "$NPM_BIN" install && "$NPM_BIN" run build)
+    "$NPM_BIN" run build --workspace=@dotplane/agent 2>/dev/null || (cd packages/agent && "$NPM_BIN" install && "$NPM_BIN" run build)
   fi
 fi
 

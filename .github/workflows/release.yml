@@ -38,8 +38,13 @@ jobs:
 
       - name: Package release tarball
         run: |
-          chmod +x scripts/package-release.sh
+          chmod +x scripts/package-release.sh scripts/verify-release.sh
           ARCH=${{ matrix.arch }} bash scripts/package-release.sh "${GITHUB_REF_NAME}"
+
+      - name: Verify release bundle
+        run: |
+          bash scripts/verify-release.sh \
+            "dist-releases/dotplane-${{ github.ref_name }}-linux-${{ matrix.arch }}.tar.gz"
 
       - name: Upload release asset
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2

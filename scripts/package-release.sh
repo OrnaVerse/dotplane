@@ -19,6 +19,10 @@ cd "$ROOT"
   echo "Run 'pnpm -r build' first" >&2
   exit 1
 }
+[[ -f packages/shared/dist/index.js ]] || {
+  echo "Run 'pnpm -r build' first (missing packages/shared/dist)" >&2
+  exit 1
+}
 
 echo "Packaging dotplane ${VERSION} (${ARCH})..."
 
@@ -40,6 +44,11 @@ mkdir -p "$STAGING/packages/agent"
 cp packages/agent/package.json "$STAGING/packages/agent/"
 cp -r packages/agent/dist "$STAGING/packages/agent/"
 
+# Shared — runtime dependency for platform and agent (workspace:* resolves on install)
+mkdir -p "$STAGING/packages/shared"
+cp packages/shared/package.json "$STAGING/packages/shared/"
+cp -r packages/shared/dist "$STAGING/packages/shared/"
+
 # Install scripts & systemd
 mkdir -p "$STAGING/scripts" "$STAGING/systemd"
 cp scripts/install.sh scripts/install-agent.sh scripts/install-fnm.sh scripts/generate-certs.sh \
@@ -53,5 +62,7 @@ echo "linux-${ARCH}" >> "$STAGING/VERSION"
 
 mkdir -p "$OUT_DIR"
 tar -czf "$TARBALL" -C "$OUT_DIR" "dotplane-${VERSION}-linux-${ARCH}"
+
+bash "$ROOT/scripts/verify-release.sh" "$TARBALL"
 
 echo "Created ${TARBALL} ($(du -h "$TARBALL" | cut -f1))"
