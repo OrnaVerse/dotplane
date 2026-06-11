@@ -3,6 +3,7 @@ import path from 'path'
 import { pipeline } from 'stream/promises'
 import { createWriteStream } from 'fs'
 import type { VcsProvider, VcsRelease } from './interface.js'
+import { vcsFetch } from './http.js'
 
 interface GitlabReleaseLink {
   name: string
@@ -46,9 +47,9 @@ export class GitlabVcsProvider implements VcsProvider {
 
   async downloadRelease(release: VcsRelease, destPath: string): Promise<string> {
     await fs.mkdir(path.dirname(destPath), { recursive: true })
-    const res = await fetch(release.downloadUrl, {
+    const res = await vcsFetch('gitlab', release.downloadUrl, {
       headers: { 'PRIVATE-TOKEN': this.token },
-    })
+    }, this.baseUrl)
     if (!res.ok || !res.body) {
       throw new Error(`GitLab download failed: ${res.status}`)
     }
@@ -73,9 +74,9 @@ export class GitlabVcsProvider implements VcsProvider {
   }
 
   private async fetchJson<T>(url: string): Promise<T> {
-    const res = await fetch(url, {
+    const res = await vcsFetch('gitlab', url, {
       headers: { 'PRIVATE-TOKEN': this.token },
-    })
+    }, this.baseUrl)
     if (!res.ok) {
       throw new Error(`GitLab API error ${res.status}: ${await res.text()}`)
     }

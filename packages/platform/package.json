@@ -10,6 +10,7 @@
     "db:migrate": "tsx src/server/db/migrate.ts"
   },
   "dependencies": {
+    "@dotplane/shared": "workspace:*",
     "@mantine/charts": "^7.15.0",
     "@mantine/core": "^7.15.0",
     "@mantine/dates": "^7.15.0",

@@ -34,7 +34,6 @@ BACKUP_DIR="${DATA_DIR}/backups"
 ARTIFACTS_DIR="/var/dotplane/artifacts"
 INSTANCES_DIR="/var/dotplane/instances"
 LOG_DIR="/var/log/dotplane"
-FNM_DIR="/usr/local/share/fnm"
 NODE_VERSION="${NODE_VERSION:-20}"
 FROM_RELEASE=""
 DOTPLANE_SKIP_BUILD="${DOTPLANE_SKIP_BUILD:-0}"
@@ -58,14 +57,9 @@ apt-get install -y -qq \
 
 # ── 2. Node.js via fnm ───────────────────────────────────────────────────────
 log "Installing Node.js ${NODE_VERSION} via fnm..."
-if ! command -v fnm >/dev/null 2>&1; then
-  curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir /usr/local --skip-shell
-fi
-export PATH="/usr/local/bin:${PATH}"
-eval "$(fnm env --shell bash)"
-fnm install "$NODE_VERSION"
-fnm default "$NODE_VERSION"
-NODE_BIN="$(fnm which node)"
+# shellcheck source=install-fnm.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/install-fnm.sh"
+install_dotplane_node "$NODE_VERSION"
 ok "Node $($NODE_BIN --version) via fnm"
 
 # ── 3. Caddy (prebuilt binary) ─────────────────────────────────────────────────
@@ -244,6 +238,7 @@ DB_PATH=${DATA_DIR}/dotplane.db
 BACKUP_DIR=${BACKUP_DIR}
 ARTIFACTS_PATH=${ARTIFACTS_DIR}
 ERROR_LOG_PATH=${LOG_DIR}/error.log
+FNM_DIR=/usr/local/share/fnm
 
 MTLS_CA_CERT_PATH=${DOTPLANE_ROOT}/certs/ca.crt
 MTLS_CLIENT_CERT_PATH=${DOTPLANE_ROOT}/certs/platform.crt

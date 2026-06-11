@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
+import { deployTokenAuth } from '../auth/deploy-token.js'
 import { createProvisionJob, getProvisionJob } from '../services/provision.service.js'
 import { db } from '../db/index.js'
 import { provisionJobs } from '../db/schema.js'
@@ -8,6 +9,7 @@ import { provisionJobs } from '../db/schema.js'
 import { routeParam } from './helpers.js'
 
 const router: Router = Router()
+router.use(deployTokenAuth)
 
 const CreateProvisionSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/).max(50),

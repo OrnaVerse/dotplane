@@ -1,3 +1,4 @@
+import { safeFetch, validateUrl, webhookUrlOptions } from '@dotplane/shared'
 import { eq } from 'drizzle-orm'
 import { db } from '../db/index.js'
 import { outboundWebhooks } from '../db/schema.js'
@@ -11,6 +12,10 @@ export interface WebhookPayload {
   event: string
   timestamp: string
   data: Record<string, unknown>
+}
+
+export function assertSafeWebhookUrl(url: string): void {
+  validateUrl(url, webhookUrlOptions())
 }
 
 export async function fireWebhooks(event: string, data: Record<string, unknown>): Promise<void> {
@@ -45,7 +50,7 @@ async function deliverWebhook(
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const res = await fetch(url, {
+      const res = await safeFetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,7 +59,7 @@ async function deliverWebhook(
         },
         body,
         signal: AbortSignal.timeout(10_000),
-      })
+      }, webhookUrlOptions())
 
       await db
         .update(outboundWebhooks)

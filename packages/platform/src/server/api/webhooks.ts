@@ -3,7 +3,7 @@ import crypto from 'crypto'
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 import { requireRole } from '../middleware/rbac.js'
-import { fireWebhooks } from '../services/webhook.service.js'
+import { assertSafeWebhookUrl, fireWebhooks } from '../services/webhook.service.js'
 import { db } from '../db/index.js'
 import { outboundWebhooks } from '../db/schema.js'
 
@@ -65,6 +65,14 @@ router.post('/', requireRole('superadmin'), (req, res) => {
     return
   }
 
+  try {
+    assertSafeWebhookUrl(body.data.url)
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Invalid webhook URL'
+    res.status(400).json({ error: msg })
+    return
+  }
+
   const secret = body.data.secret ?? crypto.randomBytes(32).toString('hex')
 
   const created = db
@@ -93,6 +101,16 @@ router.patch('/:id', requireRole('superadmin'), (req, res) => {
   if (!existing) {
     res.status(404).json({ error: 'Webhook not found' })
     return
+  }
+
+  if (body.data.url !== undefined) {
+    try {
+      assertSafeWebhookUrl(body.data.url)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Invalid webhook URL'
+      res.status(400).json({ error: msg })
+      return
+    }
   }
 
   db.update(outboundWebhooks)

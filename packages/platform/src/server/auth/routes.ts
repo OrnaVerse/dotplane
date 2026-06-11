@@ -16,7 +16,7 @@ import {
 } from '../db/schema.js'
 import { encrypt, decrypt } from '../utils/crypto.js'
 import { authMiddleware } from './middleware.js'
-import { loginRateLimiter } from '../middleware/rateLimit.js'
+import { loginRateLimiter, refreshRateLimiter } from '../middleware/rateLimit.js'
 import {
   hashRefreshToken,
   signAccessToken,
@@ -77,7 +77,12 @@ function setRefreshCookie(res: Response, refreshToken: string): void {
 }
 
 function clearRefreshCookie(res: Response): void {
-  res.clearCookie('refresh_token', { path: refreshCookiePath() })
+  res.clearCookie('refresh_token', {
+    path: refreshCookiePath(),
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+  })
 }
 
 async function resolveInstanceScope(
@@ -247,7 +252,7 @@ router.post('/login', loginRateLimiter, async (req, res) => {
   })
 })
 
-router.post('/refresh', async (req, res) => {
+router.post('/refresh', refreshRateLimiter, async (req, res) => {
   const refreshToken = req.cookies?.refresh_token as string | undefined
 
   if (!refreshToken) {
@@ -307,7 +312,7 @@ router.post('/refresh', async (req, res) => {
   res.json({ accessToken })
 })
 
-router.post('/logout', async (req, res) => {
+router.post('/logout', refreshRateLimiter, async (req, res) => {
   const refreshToken = req.cookies?.refresh_token as string | undefined
 
   if (refreshToken) {

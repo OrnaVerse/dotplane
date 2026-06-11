@@ -10,6 +10,7 @@ import { createBackup } from './services/backup.service.js'
 import { db } from './db/index.js'
 import { deployments, instances, servers, settings, userBackupCodes, users } from './db/schema.js'
 import { decrypt, encrypt } from './utils/crypto.js'
+import { anonymizeIp, safeFetch } from '@dotplane/shared'
 import { logger } from './logger.js'
 
 const [, , command, ...args] = process.argv
@@ -49,7 +50,11 @@ async function updateEnvKey(key: string, value: string): Promise<void> {
 
 async function getPublicIp(): Promise<string> {
   try {
-    const res = await fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(5000) })
+    const res = await safeFetch(
+      'https://api.ipify.org?format=json',
+      { signal: AbortSignal.timeout(5000) },
+      { allowedHostnames: ['api.ipify.org'], requireAllowlist: true },
+    )
     const data = (await res.json()) as { ip: string }
     return data.ip
   } catch {
@@ -81,7 +86,7 @@ const commands: Record<string, () => Promise<void>> = {
         .run()
     }
 
-    console.log(`Password set for ${username}`)
+    console.log(`Credentials updated for user ${username}`)
   },
 
   'rotate-url-key': async () => {
@@ -94,7 +99,7 @@ const commands: Record<string, () => Promise<void>> = {
   'show-access': async () => {
     const urlKey = process.env.PLATFORM_URL_KEY ?? (await readEnvFile()).PLATFORM_URL_KEY ?? ''
     const ip = await getPublicIp()
-    console.log(`Panel URL: https://${ip}/${urlKey}`)
+    console.log(`Panel URL: https://${anonymizeIp(ip)}/${urlKey}`)
   },
 
   backup: async () => {
@@ -285,7 +290,7 @@ const commands: Record<string, () => Promise<void>> = {
     const serverId = args[2] ?? 'local'
     const agent = new AgentService(serverId)
     await agent.unbanIp(jail, ip)
-    console.log(`Unbanned ${ip} from ${jail}`)
+    console.log(`Unbanned ${anonymizeIp(ip)} from ${jail}`)
   },
 
   update: async () => {

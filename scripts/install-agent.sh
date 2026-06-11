@@ -38,14 +38,9 @@ apt-get install -y -qq curl wget unzip rsync openssl ca-certificates systemd jq
 
 # ── 2. Node.js via fnm ───────────────────────────────────────────────────────
 log "Installing Node.js ${NODE_VERSION} via fnm..."
-if ! command -v fnm >/dev/null 2>&1; then
-  curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir /usr/local --skip-shell
-fi
-export PATH="/usr/local/bin:${PATH}"
-eval "$(fnm env --shell bash)"
-fnm install "$NODE_VERSION"
-fnm default "$NODE_VERSION"
-NODE_BIN="$(fnm which node)"
+# shellcheck source=install-fnm.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/install-fnm.sh"
+install_dotplane_node "$NODE_VERSION"
 ok "Node $($NODE_BIN --version)"
 
 # ── 3. Caddy (prebuilt — required for instance routes) ─────────────────────────

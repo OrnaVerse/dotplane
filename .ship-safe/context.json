@@ -1,0 +1,2682 @@
+{
+  "version": "9.3.2",
+  "generatedAt": "2026-06-11T08:13:34.631Z",
+  "rootPath": "D:\\Projects\\panel",
+  "recon": {
+    "frameworks": [
+      "vite"
+    ],
+    "languages": [
+      "javascript",
+      "typescript"
+    ],
+    "apiRoutes": [
+      "packages/platform/src/server/auth/routes.ts"
+    ],
+    "authPatterns": [
+      "packages/platform/src/server/auth/deploy-token.ts",
+      "packages/platform/src/server/auth/middleware.ts",
+      "packages/platform/src/server/auth/routes.ts",
+      "packages/platform/src/server/auth/tokens.ts",
+      "packages/platform/src/client/lib/auth.ts"
+    ],
+    "databases": [
+      "drizzle"
+    ],
+    "cloudProviders": [],
+    "frontendExposure": [],
+    "packageManagers": [
+      "npm"
+    ],
+    "cicd": [
+      {
+        "platform": "github-actions",
+        "file": ".github/workflows/release.yml"
+      },
+      {
+        "platform": "azure",
+        "file": "docs/ci-examples/azure-pipelines.yml"
+      },
+      {
+        "platform": "bitbucket",
+        "file": "docs/ci-examples/bitbucket-pipelines.yml"
+      }
+    ],
+    "hasDockerfile": false,
+    "hasTerraform": false,
+    "hasKubernetes": false,
+    "envFiles": [
+      ".env.example",
+      "packages/platform/src/client/.env.development"
+    ],
+    "configFiles": []
+  },
+  "fileIndex": {
+    ".env.example": {
+      "hash": "cb482d415037342926ce25bed9a6ab4ad7ee8efafe309cd2e15539808c1d7067",
+      "size": 432,
+      "lastScanned": "2026-06-11T08:13:34.559Z"
+    },
+    ".gitignore": {
+      "hash": "64b2f52cb7e0666541379969e018e3a7006ada7d95d86a520ba89f3a41b60d03",
+      "size": 70,
+      "lastScanned": "2026-06-11T08:13:34.560Z"
+    },
+    "01-cursor-prompt.md": {
+      "hash": "5be581db29ae2b5954283acba71e513445bed5b3a7edc07bb60cc82ab77125db",
+      "size": 8788,
+      "lastScanned": "2026-06-11T08:13:34.560Z"
+    },
+    "02-database-schema.md": {
+      "hash": "2196e3944bce274768bda4cd445782b308d961c1f1b4f1ce78d8ad6223271d24",
+      "size": 12503,
+      "lastScanned": "2026-06-11T08:13:34.560Z"
+    },
+    "03-platform-api.md": {
+      "hash": "db52b6312f071e69bd607d3d94cabdac89b38756428c21687a03af452930779f",
+      "size": 25662,
+      "lastScanned": "2026-06-11T08:13:34.561Z"
+    },
+    "04-agent-systemd-caddy.md": {
+      "hash": "b1917694fc34b63450a0385c51d18df98c571bdb2fa620361e6919f643d3a00f",
+      "size": 19118,
+      "lastScanned": "2026-06-11T08:13:34.561Z"
+    },
+    "05-ui-and-install.md": {
+      "hash": "5df406556802d72edaa6cd882bc82c7ebbd7be962323e4a56f340c520984ddfd",
+      "size": 27387,
+      "lastScanned": "2026-06-11T08:13:34.561Z"
+    },
+    "eslint.config.js": {
+      "hash": "5c804330123c6755743a9e47f802225b853a7ddb156b67c3c081ae5252454da6",
+      "size": 533,
+      "lastScanned": "2026-06-11T08:13:34.562Z"
+    },
+    "package.json": {
+      "hash": "7811f66965fd31dc27993f6e5caae46c4026e12b42e1a21aa597330d271024a7",
+      "size": 637,
+      "lastScanned": "2026-06-11T08:13:34.562Z"
+    },
+    "pnpm-workspace.yaml": {
+      "hash": "477e6c5f8b033a1ecb7f8919ad2726e4328c7893c4ad6228d62471425b22dbe7",
+      "size": 27,
+      "lastScanned": "2026-06-11T08:13:34.562Z"
+    },
+    "README.md": {
+      "hash": "8ccfde18e9f2e42417fa01dc0a8d599255275192e1664c365453a3766af4808c",
+      "size": 3261,
+      "lastScanned": "2026-06-11T08:13:34.563Z"
+    },
+    "tsconfig.base.json": {
+      "hash": "af3c1ab348fb39b071a711f8bd7ec6c208147a44176c812aeb803b611b615b68",
+      "size": 505,
+      "lastScanned": "2026-06-11T08:13:34.564Z"
+    },
+    "scripts/bootstrap-install.sh": {
+      "hash": "8a62b9251baf6b78ae4af46d3d63ababfb4e4141eb5b5f0cbe7e2c8c24f6caf8",
+      "size": 3211,
+      "lastScanned": "2026-06-11T08:13:34.568Z"
+    },
+    "scripts/dotplane-agent.sudoers": {
+      "hash": "ecf6e8e999e51635e7bbbae8a4698dc2579a14a5da455a66f992e78953b9ed64",
+      "size": 819,
+      "lastScanned": "2026-06-11T08:13:34.568Z"
+    },
+    "scripts/generate-certs.sh": {
+      "hash": "3b7047ffa3ac6442535769cfc0c55c74ffb7e37379abd51e0b16b60dc35b1fe9",
+      "size": 2294,
+      "lastScanned": "2026-06-11T08:13:34.571Z"
+    },
+    "scripts/install-agent.sh": {
+      "hash": "12a99208e857297c19f8709b9e9a47ba6af7ce3afbc11371b1da30fa8a48eca7",
+      "size": 6096,
+      "lastScanned": "2026-06-11T08:13:34.575Z"
+    },
+    "scripts/install-fnm.sh": {
+      "hash": "02421cc548e5fb21bd31136ff9efc0d7ac19885eb8683c6ac303459e42e572a3",
+      "size": 1473,
+      "lastScanned": "2026-06-11T08:13:34.578Z"
+    },
+    "scripts/install.sh": {
+      "hash": "81becb57381fbe7c83f4fde222618b8b70e467ec96e2bb7d8919f39bc21ead9d",
+      "size": 15712,
+      "lastScanned": "2026-06-11T08:13:34.583Z"
+    },
+    "scripts/package-release.sh": {
+      "hash": "8442e5696de3ff967bf2398a1d567ff2acd855f449b3de32ffc16d3048983fed",
+      "size": 2036,
+      "lastScanned": "2026-06-11T08:13:34.586Z"
+    },
+    "docs/runtime-requirements.md": {
+      "hash": "d5c38d27a39a4660af8103e3f03b434e1fe42764b51cfc14df2a14dbf2d9239b",
+      "size": 4254,
+      "lastScanned": "2026-06-11T08:13:34.587Z"
+    },
+    "docs/security.md": {
+      "hash": "00c065900be63eeb9ce23224816b8c280015d166ab03db9002e73062722ca72a",
+      "size": 6591,
+      "lastScanned": "2026-06-11T08:13:34.587Z"
+    },
+    "docs/webhooks.md": {
+      "hash": "09b3cc6cc09bff29653025077771855b4d1364f5c1488729b6164c62d66663a1",
+      "size": 5001,
+      "lastScanned": "2026-06-11T08:13:34.588Z"
+    },
+    "systemd/dotnet-app@.service": {
+      "hash": "f1131189f8c7862d8bfe6501b46f5e35fd9c603d8b8d869f813bb86095708b46",
+      "size": 1459,
+      "lastScanned": "2026-06-11T08:13:34.588Z"
+    },
+    ".cursor/rules/UI.mdc": {
+      "hash": "a0d66d8d59e3907dd511562e10f6c2fdb02d3c35a640e7f8492e5f72cedd148a",
+      "size": 62,
+      "lastScanned": "2026-06-11T08:13:34.588Z"
+    },
+    ".github/workflows/release.yml": {
+      "hash": "451489dfffb50c57d12fe1e503b5c63c44bf220de2c2531b8f2acd32aa3e1add",
+      "size": 2378,
+      "lastScanned": "2026-06-11T08:13:34.588Z"
+    },
+    "packages/agent/package.json": {
+      "hash": "0c5ef0d8de7ef08713ab23ad08d16f60d16907f60dc4c260c2ede8cb483f5a0e",
+      "size": 569,
+      "lastScanned": "2026-06-11T08:13:34.589Z"
+    },
+    "packages/agent/tsconfig.json": {
+      "hash": "4ff3c3ff7b881a8901ce304478be85ee8d38d5b680d50cd740d3b794da7d8383",
+      "size": 142,
+      "lastScanned": "2026-06-11T08:13:34.589Z"
+    },
+    "packages/cli/package.json": {
+      "hash": "07f0bab2860de4d8ac97da70f905b825f8c00d16001903c8ac89a72b97cfe23c",
+      "size": 422,
+      "lastScanned": "2026-06-11T08:13:34.589Z"
+    },
+    "packages/cli/tsconfig.json": {
+      "hash": "4ff3c3ff7b881a8901ce304478be85ee8d38d5b680d50cd740d3b794da7d8383",
+      "size": 142,
+      "lastScanned": "2026-06-11T08:13:34.589Z"
+    },
+    "packages/shared/package.json": {
+      "hash": "463d90c2787b0cd8966e8bd1778e6bc331fdbbc5e2c52b1495f959cf4f1eba41",
+      "size": 180,
+      "lastScanned": "2026-06-11T08:13:34.590Z"
+    },
+    "packages/shared/tsconfig.json": {
+      "hash": "4ff3c3ff7b881a8901ce304478be85ee8d38d5b680d50cd740d3b794da7d8383",
+      "size": 142,
+      "lastScanned": "2026-06-11T08:13:34.590Z"
+    },
+    "packages/platform/drizzle.config.ts": {
+      "hash": "ab392132a54a50dfaa29c105e9c522d1599d226d7613f5fb388d988b26bf39f9",
+      "size": 235,
+      "lastScanned": "2026-06-11T08:13:34.590Z"
+    },
+    "packages/platform/package.json": {
+      "hash": "1e62306c7ab2e8a03df2f0e71f08aa2a27d59533f7b8be19aa7f350834efcb04",
+      "size": 2029,
+      "lastScanned": "2026-06-11T08:13:34.590Z"
+    },
+    "packages/platform/tsconfig.json": {
+      "hash": "6284b5575041834aaadb2ee26315ea7691fbc7d52daf66b4525140b6b9048b9d",
+      "size": 284,
+      "lastScanned": "2026-06-11T08:13:34.591Z"
+    },
+    "packages/platform/tsconfig.server.json": {
+      "hash": "01c3d10876d46aab29dfe974907b4d11376cc78fe95c6a0b3ce849a7a1ca75d6",
+      "size": 184,
+      "lastScanned": "2026-06-11T08:13:34.591Z"
+    },
+    "docs/ci-examples/azure-pipelines.yml": {
+      "hash": "828998fbe423663fcff6873924e77653d3c915006452dc05eb716c9fd3ec51d3",
+      "size": 2729,
+      "lastScanned": "2026-06-11T08:13:34.591Z"
+    },
+    "docs/ci-examples/bitbucket-pipelines.yml": {
+      "hash": "c64daae06d73d5dd0b06a087093f5a71897b4e1811f4ed1a2c58341c886474fb",
+      "size": 1904,
+      "lastScanned": "2026-06-11T08:13:34.591Z"
+    },
+    "docs/ci-examples/github-actions.yml": {
+      "hash": "e3d6e458298a080a736cbf80bed44cc27a677f1ca0d650ac6018978fa155212c",
+      "size": 2311,
+      "lastScanned": "2026-06-11T08:13:34.592Z"
+    },
+    "docs/ci-examples/gitlab-ci.yml": {
+      "hash": "cc4bc0f50fc6db1ead4e73a9530f52b739ce94316badeeb66af421f411981451",
+      "size": 1887,
+      "lastScanned": "2026-06-11T08:13:34.592Z"
+    },
+    "packages/agent/src/config.ts": {
+      "hash": "befcf5537261d106f7f7c80de4970e5f6b31dc9f63e42d73821138955811d783",
+      "size": 2023,
+      "lastScanned": "2026-06-11T08:13:34.593Z"
+    },
+    "packages/agent/src/index.ts": {
+      "hash": "f80d3cf3f6a8726ddef57ddab43bc9f4edb2db2c2359189c255273590cd73b05",
+      "size": 1819,
+      "lastScanned": "2026-06-11T08:13:34.593Z"
+    },
+    "packages/agent/src/logger.ts": {
+      "hash": "dd85a150f1b301606b99a98c3e70b544cf09e4bddbdc0c587fd6dd831f15edc8",
+      "size": 647,
+      "lastScanned": "2026-06-11T08:13:34.593Z"
+    },
+    "packages/shared/src/index.ts": {
+      "hash": "acd32ee9ff26b317208d2456ccc82c1e26b9f514f3940e26a04b7df402ee6aac",
+      "size": 255,
+      "lastScanned": "2026-06-11T08:13:34.593Z"
+    },
+    "packages/shared/src/url.ts": {
+      "hash": "dd0fd4f1030540e373c0d8486fca1157083f07440b0af374a7310dfa560e6130",
+      "size": 5177,
+      "lastScanned": "2026-06-11T08:13:34.594Z"
+    },
+    "packages/cli/src/client.ts": {
+      "hash": "f589431c5ef0ee8485e1e031086b6bbb8008f6e83fa5c2f299b06cd5725dfac8",
+      "size": 4270,
+      "lastScanned": "2026-06-11T08:13:34.595Z"
+    },
+    "packages/cli/src/config.ts": {
+      "hash": "2ef69c6ae9b25967c385c2dcc00be20f0068a5c62911150a57b8ab8f1f693a0b",
+      "size": 1205,
+      "lastScanned": "2026-06-11T08:13:34.595Z"
+    },
+    "packages/cli/src/index.ts": {
+      "hash": "bcff00cba52309130b7327a8eabdaff740d68f5b1a02dc5797a52bf8cc3762ad",
+      "size": 13686,
+      "lastScanned": "2026-06-11T08:13:34.595Z"
+    },
+    "packages/platform/drizzle/0000_naive_lily_hollister.sql": {
+      "hash": "b1aae1978a02cb4c0312adb3a326d5491db40420efaeae615c7bbc4cc91961df",
+      "size": 9461,
+      "lastScanned": "2026-06-11T08:13:34.595Z"
+    },
+    "packages/agent/src/api/cert-status.ts": {
+      "hash": "5867e2b3a99f20460d8ec98823c59284b0f0113dcba74e304841987443949bad",
+      "size": 3000,
+      "lastScanned": "2026-06-11T08:13:34.596Z"
+    },
+    "packages/agent/src/api/fail2ban.ts": {
+      "hash": "a964eb894a718ed6e59fab804e63f2d901b0f5c5dda4065b8480df4aeac9de83",
+      "size": 843,
+      "lastScanned": "2026-06-11T08:13:34.597Z"
+    },
+    "packages/agent/src/api/firewall.ts": {
+      "hash": "005e5c837ba1781b9a2c1d69c241fafb101b4185622de741cc3bfbfaa3e2c47e",
+      "size": 1276,
+      "lastScanned": "2026-06-11T08:13:34.597Z"
+    },
+    "packages/agent/src/api/health.ts": {
+      "hash": "91cd283168ca5cc72b65328930a63b83bf338318ba794750dd89830ef15dddcd",
+      "size": 2320,
+      "lastScanned": "2026-06-11T08:13:34.598Z"
+    },
+    "packages/agent/src/api/instances.ts": {
+      "hash": "d5c56c2bf3af6e5d8aa2ef51b52e5df4a682030f342803160fe3c449d7ee7b3a",
+      "size": 3624,
+      "lastScanned": "2026-06-11T08:13:34.598Z"
+    },
+    "packages/agent/src/api/pg.ts": {
+      "hash": "6a18544c307a6016d1098ae3fecdfee284491bee6eebf07abcd01519fa050c1c",
+      "size": 775,
+      "lastScanned": "2026-06-11T08:13:34.598Z"
+    },
+    "packages/agent/src/api/runtime.ts": {
+      "hash": "27c9b883bc58141473850049120e0b469f85a31493baa9558baebf8bdad1b12f",
+      "size": 1245,
+      "lastScanned": "2026-06-11T08:13:34.598Z"
+    },
+    "packages/agent/src/api/sdk.ts": {
+      "hash": "220ee0f1c3705e1fca58180bab440b71b2d1dd29bc92d082bcc26eef4b254dfe",
+      "size": 1214,
+      "lastScanned": "2026-06-11T08:13:34.599Z"
+    },
+    "packages/agent/src/services/caddy.service.ts": {
+      "hash": "ceae6534d801c13327270b06fe935d1643cd79c0c386f396e3bf5ab330e28b45",
+      "size": 2494,
+      "lastScanned": "2026-06-11T08:13:34.599Z"
+    },
+    "packages/agent/src/services/deploy.service.ts": {
+      "hash": "5af1b9fb7356828cc7e3eecba6c51cff7231f9f7eca434637aac1ceb52f54f6b",
+      "size": 3014,
+      "lastScanned": "2026-06-11T08:13:34.599Z"
+    },
+    "packages/agent/src/services/fail2ban.service.ts": {
+      "hash": "ac7a4b3f0e4653b90e2cedcd3f54285dba227109e4ed96c78fd6fd18bc5e4505",
+      "size": 1671,
+      "lastScanned": "2026-06-11T08:13:34.600Z"
+    },
+    "packages/agent/src/services/firewall.service.ts": {
+      "hash": "2288e8a8410d89c6fe2d1f546fe38e3ea55385167216eac9538902cc85dd6ed2",
+      "size": 2154,
+      "lastScanned": "2026-06-11T08:13:34.600Z"
+    },
+    "packages/agent/src/services/pg.service.ts": {
+      "hash": "fc9de65d720d0e7b2d80b00012ab270edfbfd9cfd8dbaf5a717fb45a86650a94",
+      "size": 4968,
+      "lastScanned": "2026-06-11T08:13:34.600Z"
+    },
+    "packages/agent/src/services/runtime.service.ts": {
+      "hash": "b070e6c2a63f6fc3aa00775219097d644dadb6bdfcd118bbb8c54545218d5610",
+      "size": 2957,
+      "lastScanned": "2026-06-11T08:13:34.600Z"
+    },
+    "packages/agent/src/services/sdk.service.ts": {
+      "hash": "5dbfda3ef79ba533e16f302c1ed1ac109c95a2aa39e9138060c0303b0aacf455",
+      "size": 1913,
+      "lastScanned": "2026-06-11T08:13:34.601Z"
+    },
+    "packages/agent/src/services/systemd.service.ts": {
+      "hash": "5f9453678f16b4f98430e356a7b0d560a2c922506a7a728b85e0c5502241ef1e",
+      "size": 4277,
+      "lastScanned": "2026-06-11T08:13:34.601Z"
+    },
+    "packages/agent/src/utils/params.ts": {
+      "hash": "e626c7be3aea071d4e492e937312d2752afa4a2f634a4df54720a4d234e26989",
+      "size": 274,
+      "lastScanned": "2026-06-11T08:13:34.601Z"
+    },
+    "packages/platform/src/client/.env.development": {
+      "hash": "a0213f5712eae8315058131a6df87d02f3983b5354ba31ab583804188d9f568a",
+      "size": 26,
+      "lastScanned": "2026-06-11T08:13:34.601Z"
+    },
+    "packages/platform/src/client/App.tsx": {
+      "hash": "311af52960878c186840ec1651d9e5f9bfceea68d75f764c82c1e0f6bbc186ef",
+      "size": 2126,
+      "lastScanned": "2026-06-11T08:13:34.602Z"
+    },
+    "packages/platform/src/client/global.css": {
+      "hash": "40522fa2b05b1f866bc760da229dcb010879197b2ef58f1ea933f5f9900af1b4",
+      "size": 251,
+      "lastScanned": "2026-06-11T08:13:34.602Z"
+    },
+    "packages/platform/src/client/index.html": {
+      "hash": "8b76ea33c5976610742144061271b04c686cd924b0f3fc64d6739fa7be549e2e",
+      "size": 553,
+      "lastScanned": "2026-06-11T08:13:34.602Z"
+    },
+    "packages/platform/src/client/main.tsx": {
+      "hash": "86469f92c7e774db3a1d68a7fd8493de7065104c7d6318c91d760e23105bc957",
+      "size": 1409,
+      "lastScanned": "2026-06-11T08:13:34.602Z"
+    },
+    "packages/platform/src/client/postcss.config.cjs": {
+      "hash": "d566b03e06e026cfd53e15f9dfdf8c9831a75aa48d5f075cb94771d65aa7be28",
+      "size": 304,
+      "lastScanned": "2026-06-11T08:13:34.603Z"
+    },
+    "packages/platform/src/client/sw.ts": {
+      "hash": "e4f0aca5f987a689a8b89c1e00fe344042fb85da9b0c0b835e73cbc79a0d7a3e",
+      "size": 1561,
+      "lastScanned": "2026-06-11T08:13:34.603Z"
+    },
+    "packages/platform/src/client/theme.ts": {
+      "hash": "5850f06524c7dbf50423323aefde91f96f1c9f996efbaa87537d5b3e1663826e",
+      "size": 1626,
+      "lastScanned": "2026-06-11T08:13:34.603Z"
+    },
+    "packages/platform/src/client/vite-env.d.ts": {
+      "hash": "9d34db07f9146ae5e9b2d8dc9027518254ee6cff13067d1f12e2a9ccb83dc500",
+      "size": 164,
+      "lastScanned": "2026-06-11T08:13:34.603Z"
+    },
+    "packages/platform/src/client/vite.config.ts": {
+      "hash": "3080566a84c06ecb488b56c567bcaa9e1836f0f6879bdf7b1b6a9742d87561f3",
+      "size": 1301,
+      "lastScanned": "2026-06-11T08:13:34.603Z"
+    },
+    "packages/platform/drizzle/meta/0000_snapshot.json": {
+      "hash": "8384e9603a7393b44dd36ec88484960a0794b7158c7c2a5abec64128019e17bf",
+      "size": 51144,
+      "lastScanned": "2026-06-11T08:13:34.604Z"
+    },
+    "packages/platform/drizzle/meta/_journal.json": {
+      "hash": "157f0408458a3e2a0b20b4de50fdc81490beafcb571992888e4e03b2af6d63dc",
+      "size": 210,
+      "lastScanned": "2026-06-11T08:13:34.604Z"
+    },
+    "packages/platform/src/server/cli.ts": {
+      "hash": "0600a6e41ffeb716737f94b867bef84a791fd1061a040b891147224672861b86",
+      "size": 10831,
+      "lastScanned": "2026-06-11T08:13:34.604Z"
+    },
+    "packages/platform/src/server/config.ts": {
+      "hash": "4e2bc2033694542d2721cf1f3399b1b36093dc2304c672dddc8177a90d313c81",
+      "size": 1035,
+      "lastScanned": "2026-06-11T08:13:34.605Z"
+    },
+    "packages/platform/src/server/index.ts": {
+      "hash": "5131fa899040803b03e00f668c1570e704e4bd3ae05dbd5eedd463e549eb68fa",
+      "size": 4863,
+      "lastScanned": "2026-06-11T08:13:34.605Z"
+    },
+    "packages/platform/src/server/logger.ts": {
+      "hash": "4cfc1f4617957a15a4235fc5f28e248df5436ab88a1eb53f3d2ac6232bac0f22",
+      "size": 617,
+      "lastScanned": "2026-06-11T08:13:34.605Z"
+    },
+    "packages/platform/src/client/components/AuthGuard.tsx": {
+      "hash": "e7dd7040f3fd9a4f4e2f140bda8ee4e24e2b5bda356088892367cf35b8024681",
+      "size": 714,
+      "lastScanned": "2026-06-11T08:13:34.605Z"
+    },
+    "packages/platform/src/client/components/ErrorBoundary.tsx": {
+      "hash": "f6d1b20f3ab5736ff291efd37b0d4f551fde2eddd2ed6c13f13aecc3e393dfc9",
+      "size": 979,
+      "lastScanned": "2026-06-11T08:13:34.605Z"
+    },
+    "packages/platform/src/client/hooks/useDeployment.ts": {
+      "hash": "05f13443d40b3261b0b3d5eb975901c1ef45e678b8fa7f2bfae5f17e1e9fdbff",
+      "size": 4411,
+      "lastScanned": "2026-06-11T08:13:34.606Z"
+    },
+    "packages/platform/src/client/hooks/useInstances.ts": {
+      "hash": "1f739c306899575e15c33bb77d106994a7fa917f23c1758c4dee17f464051a67",
+      "size": 1847,
+      "lastScanned": "2026-06-11T08:13:34.606Z"
+    },
+    "packages/platform/src/client/hooks/useServers.ts": {
+      "hash": "011b55f701cf505f6f8242eb38eac4f1dde60321fd2df890d2f5daf8d420036a",
+      "size": 1722,
+      "lastScanned": "2026-06-11T08:13:34.606Z"
+    },
+    "packages/platform/src/client/hooks/useSSE.ts": {
+      "hash": "85c3fb8e6fd51df1ba4f75ace1565505fe88fdff27e55536b10c44889f70afbf",
+      "size": 1853,
+      "lastScanned": "2026-06-11T08:13:34.606Z"
+    },
+    "packages/platform/src/client/pages/ApiAccess.tsx": {
+      "hash": "9f9e7e0255b4dda856207be3954445b4afcb0dc9060463fba28b9ac7604b4b01",
+      "size": 5069,
+      "lastScanned": "2026-06-11T08:13:34.607Z"
+    },
+    "packages/platform/src/client/pages/Apps.tsx": {
+      "hash": "a46cf5506ed5a8eb82f17f5509742c86d006379eabdb88aaed6b6e880343d8f8",
+      "size": 4626,
+      "lastScanned": "2026-06-11T08:13:34.607Z"
+    },
+    "packages/platform/src/client/pages/AuditLog.tsx": {
+      "hash": "40c136991ad80d56495ef1e13f2643e5315890c28776fefe653ad2ee66bd0ab3",
+      "size": 3995,
+      "lastScanned": "2026-06-11T08:13:34.607Z"
+    },
+    "packages/platform/src/client/pages/Dashboard.tsx": {
+      "hash": "06868780fc9ed4e8084d41762e2dbac586f0e88cc0db664d1a2ba17451ddd568",
+      "size": 5009,
+      "lastScanned": "2026-06-11T08:13:34.607Z"
+    },
+    "packages/platform/src/client/pages/Instances.tsx": {
+      "hash": "733052d39fd35b33ba10fb88ce9d322f2be73705c8193057b814d8bcbd806607",
+      "size": 9989,
+      "lastScanned": "2026-06-11T08:13:34.608Z"
+    },
+    "packages/platform/src/client/pages/Login.tsx": {
+      "hash": "d3ab98d93fbb7338a98f97ed7b4bdca10747278cd7b0d8eaa70528bcbfdaac2d",
+      "size": 4240,
+      "lastScanned": "2026-06-11T08:13:34.608Z"
+    },
+    "packages/platform/src/client/pages/Logs.tsx": {
+      "hash": "38af431caebb921602589f7396acfea0aed1f66956400bcbe7b12c66cc5ae90a",
+      "size": 4182,
+      "lastScanned": "2026-06-11T08:13:34.608Z"
+    },
+    "packages/platform/src/client/pages/Postgres.tsx": {
+      "hash": "0ddbce2b52f05182796516f2269b293bdb9ce112c3c903a5ecbf3076c842703b",
+      "size": 6584,
+      "lastScanned": "2026-06-11T08:13:34.608Z"
+    },
+    "packages/platform/src/client/pages/Profile.tsx": {
+      "hash": "d825b89ac85215d3582dd1f321cd2db9b9140137980ef8daba22a17f3daf9105",
+      "size": 4262,
+      "lastScanned": "2026-06-11T08:13:34.609Z"
+    },
+    "packages/platform/src/client/pages/Releases.tsx": {
+      "hash": "03ebf678800c33475059d56204e4dc4ad6d30378c8c208f7638cfaafb3852067",
+      "size": 6360,
+      "lastScanned": "2026-06-11T08:13:34.609Z"
+    },
+    "packages/platform/src/client/pages/SDK.tsx": {
+      "hash": "3d18a6720c0b9501a98b894ef7e5369a871571c8f10c073e752bee3624f705c7",
+      "size": 4870,
+      "lastScanned": "2026-06-11T08:13:34.609Z"
+    },
+    "packages/platform/src/client/pages/Servers.tsx": {
+      "hash": "72b10b345b0850cea2a94355a23ffaa78504a0693d9ba5fb268d12fde9c6d2ad",
+      "size": 5656,
+      "lastScanned": "2026-06-11T08:13:34.609Z"
+    },
+    "packages/platform/src/client/pages/Settings.tsx": {
+      "hash": "f0cb3c16ee5112b97711735e82bca75f6234ff87d14bb8deb16a9fe52225e80f",
+      "size": 2722,
+      "lastScanned": "2026-06-11T08:13:34.610Z"
+    },
+    "packages/platform/src/client/pages/Users.tsx": {
+      "hash": "f2a1ca535338a041e38e9f8d2966dc407d06bdae2aec1b5581d9737e13c8e605",
+      "size": 3755,
+      "lastScanned": "2026-06-11T08:13:34.610Z"
+    },
+    "packages/platform/src/client/pages/Webhooks.tsx": {
+      "hash": "36920a68add07ca87cbfc09d779d3a2d63bed291b4b2fd048f8971746e901610",
+      "size": 4917,
+      "lastScanned": "2026-06-11T08:13:34.610Z"
+    },
+    "packages/platform/src/client/lib/api.ts": {
+      "hash": "e830e6d55980730339870b13d477d49b50fe30635997a59f147f43630fd5266c",
+      "size": 4832,
+      "lastScanned": "2026-06-11T08:13:34.610Z"
+    },
+    "packages/platform/src/client/lib/auth.ts": {
+      "hash": "6998efdcea6065abc241743343598f06ef8d6a80072d35ffb6fdce3d7f48600f",
+      "size": 2044,
+      "lastScanned": "2026-06-11T08:13:34.611Z"
+    },
+    "packages/platform/src/client/lib/nav.ts": {
+      "hash": "f43da7b7c3cb91568bd8713c8d3ebae29ffe57219729c1fac97090e2e9cad867",
+      "size": 1170,
+      "lastScanned": "2026-06-11T08:13:34.611Z"
+    },
+    "packages/platform/src/client/lib/types.ts": {
+      "hash": "304a4133e0a65e16ea1ca2656fabf66c29bcd310a9f7ec0ef26a69575166a11b",
+      "size": 4308,
+      "lastScanned": "2026-06-11T08:13:34.611Z"
+    },
+    "packages/platform/src/client/public/manifest.json": {
+      "hash": "31564d275785d9ab0ce7c0fac0f44220c978f5baaf2aae4e04e290bc153aeef4",
+      "size": 494,
+      "lastScanned": "2026-06-11T08:13:34.611Z"
+    },
+    "packages/platform/src/server/api/apps.ts": {
+      "hash": "7ff3624e35033d895be712bbf24320b911f652b9a12932c4b4cc223007e03419",
+      "size": 5934,
+      "lastScanned": "2026-06-11T08:13:34.611Z"
+    },
+    "packages/platform/src/server/api/audit.ts": {
+      "hash": "8803cf68bec753c33514f9c6023c38af445a762564570f741d8484827698bcc0",
+      "size": 2185,
+      "lastScanned": "2026-06-11T08:13:34.613Z"
+    },
+    "packages/platform/src/server/api/helpers.ts": {
+      "hash": "5fcc1ad18e3e28d35347bd79f21b07f5ade4d9f93c464e4f29e550e1528cd7e7",
+      "size": 835,
+      "lastScanned": "2026-06-11T08:13:34.613Z"
+    },
+    "packages/platform/src/server/api/instances.ts": {
+      "hash": "76875a9f6abe2b849190ded2071ac3982e78cbafb268bb7c37916a23b53b7370",
+      "size": 12781,
+      "lastScanned": "2026-06-11T08:13:34.614Z"
+    },
+    "packages/platform/src/server/api/openapi.ts": {
+      "hash": "1602ca2283e2e38d2fec117a8e7361dbe57325ab8f4f3d6488c1d0ff62d5269b",
+      "size": 4237,
+      "lastScanned": "2026-06-11T08:13:34.614Z"
+    },
+    "packages/platform/src/server/api/pg.ts": {
+      "hash": "4a448d0879f5c9574ecd1d7416476458cd7ea04bf02770c9bd36022f3cd88892",
+      "size": 6854,
+      "lastScanned": "2026-06-11T08:13:34.614Z"
+    },
+    "packages/platform/src/server/api/provision.ts": {
+      "hash": "d6076262108147f753a8ebf3d7c6128519fae143ecdb514a981cf890db36f124",
+      "size": 2354,
+      "lastScanned": "2026-06-11T08:13:34.615Z"
+    },
+    "packages/platform/src/server/api/releases.ts": {
+      "hash": "a655ded43d1aa5c4d770386f92e31f0e2a3c86be33750e1967c44f11ebe0c6c4",
+      "size": 7277,
+      "lastScanned": "2026-06-11T08:13:34.615Z"
+    },
+    "packages/platform/src/server/api/sdk.ts": {
+      "hash": "826a54224c74c2edd928d749f80955b33374e0ef237f71108b412b174f0fdeb9",
+      "size": 3127,
+      "lastScanned": "2026-06-11T08:13:34.615Z"
+    },
+    "packages/platform/src/server/api/servers.ts": {
+      "hash": "835348c33cd5bce7dbb6ad6d29e1b2fa3ae69611f1f27f2ca70a29f05aeb5494",
+      "size": 11165,
+      "lastScanned": "2026-06-11T08:13:34.615Z"
+    },
+    "packages/platform/src/server/api/settings.ts": {
+      "hash": "f3ef9a8387a7937aeab0b7b56dd69156f16d9c8cd30c5f6c7a3b734f003f890b",
+      "size": 4138,
+      "lastScanned": "2026-06-11T08:13:34.616Z"
+    },
+    "packages/platform/src/server/api/users.ts": {
+      "hash": "3688ea90a8a734cd977e0e45500ce154dd3c0764b6c77afa277f939b34f73a80",
+      "size": 7848,
+      "lastScanned": "2026-06-11T08:13:34.616Z"
+    },
+    "packages/platform/src/server/api/webhooks.ts": {
+      "hash": "f7aa605c778ba0bd4ae92b6eb01eaa2dd1d48b4bcd7fd05254dbe5e11fd445a0",
+      "size": 4436,
+      "lastScanned": "2026-06-11T08:13:34.616Z"
+    },
+    "packages/platform/src/server/auth/deploy-token.ts": {
+      "hash": "420b4d9e85255ce75cea0521e74d6ad1e66235e0e9efee8d6897cc52cacea364",
+      "size": 989,
+      "lastScanned": "2026-06-11T08:13:34.617Z"
+    },
+    "packages/platform/src/server/auth/middleware.ts": {
+      "hash": "1f0b0ee7cc42d39d2cf434797a8cfd167e4b14161d93414fd5bedc5020c0d9f4",
+      "size": 1116,
+      "lastScanned": "2026-06-11T08:13:34.617Z"
+    },
+    "packages/platform/src/server/auth/routes.ts": {
+      "hash": "a0e0c73dcbe876c1a160cf100f7b70e3d5f7e5daa06fabb331b03e182752594a",
+      "size": 12855,
+      "lastScanned": "2026-06-11T08:13:34.617Z"
+    },
+    "packages/platform/src/server/auth/tokens.ts": {
+      "hash": "4a518583e13a059972c3031b6d7258d5d94dd55b028a56d80bccfd254e6dcc82",
+      "size": 1256,
+      "lastScanned": "2026-06-11T08:13:34.618Z"
+    },
+    "packages/platform/src/server/services/agent.service.ts": {
+      "hash": "d5731ff1d9998a2ad054a8de42e633df036dc260dff0dc315a572a3875870f4c",
+      "size": 8066,
+      "lastScanned": "2026-06-11T08:13:34.618Z"
+    },
+    "packages/platform/src/server/services/backup.service.ts": {
+      "hash": "f4eeea5216eb72d9656795e773b92add70c438f08cacd117426e5768418c47b1",
+      "size": 1366,
+      "lastScanned": "2026-06-11T08:13:34.618Z"
+    },
+    "packages/platform/src/server/services/cert.service.ts": {
+      "hash": "67e25629f3607599b844086b549df5b69abd9c036440cac6798f021cd0f248d7",
+      "size": 2987,
+      "lastScanned": "2026-06-11T08:13:34.618Z"
+    },
+    "packages/platform/src/server/services/deploy.service.ts": {
+      "hash": "9f2d02e99af276a1d31bedc88a14c6e05c7f330b517edd72465e9faae513685f",
+      "size": 11272,
+      "lastScanned": "2026-06-11T08:13:34.619Z"
+    },
+    "packages/platform/src/server/services/health.service.ts": {
+      "hash": "3895da7c2d83dd73b43d1bf71317d816f24424b6efd355fbd40556ad88868c34",
+      "size": 2884,
+      "lastScanned": "2026-06-11T08:13:34.619Z"
+    },
+    "packages/platform/src/server/services/pg-health.service.ts": {
+      "hash": "fc0896bc90ab14098835e2d474c435b6079f40e48f970720f8add1b1af4f68f3",
+      "size": 5707,
+      "lastScanned": "2026-06-11T08:13:34.619Z"
+    },
+    "packages/platform/src/server/services/provision.service.ts": {
+      "hash": "2efa29581928701603949bcffb89a74611cb83b14b9a35a922991e9c8528d58b",
+      "size": 5126,
+      "lastScanned": "2026-06-11T08:13:34.619Z"
+    },
+    "packages/platform/src/server/services/reconcile.service.ts": {
+      "hash": "c6ea0e1547450c84ca2825edc8889a47ceba32bc217ee094cfef0b5bcb08a7cb",
+      "size": 936,
+      "lastScanned": "2026-06-11T08:13:34.620Z"
+    },
+    "packages/platform/src/server/services/upload.service.ts": {
+      "hash": "954dd62b6c15839d6aa20178efa5908113431a5242864f4305eeb0573ba0cd15",
+      "size": 2327,
+      "lastScanned": "2026-06-11T08:13:34.620Z"
+    },
+    "packages/platform/src/server/services/webhook.service.ts": {
+      "hash": "7f67e34e54b83fc81b3ce3e53ed888e854c93715f1bc15619e797b7232274905",
+      "size": 2514,
+      "lastScanned": "2026-06-11T08:13:34.621Z"
+    },
+    "packages/platform/src/server/db/index.ts": {
+      "hash": "e68faf462e8b77be475838b72e67ca1283ffb0baef9ae4331f045b3d7cd88a72",
+      "size": 692,
+      "lastScanned": "2026-06-11T08:13:34.621Z"
+    },
+    "packages/platform/src/server/db/migrate.ts": {
+      "hash": "cbe2afb9edf585aa38c062a497d723d038e51bf0a256eeb09ae51e013108ac3d",
+      "size": 1193,
+      "lastScanned": "2026-06-11T08:13:34.621Z"
+    },
+    "packages/platform/src/server/db/schema.ts": {
+      "hash": "015ea8820b31dee1c18fde21796bf64eb1426e307d5869b089f3d33c7f5ad6eb",
+      "size": 13177,
+      "lastScanned": "2026-06-11T08:13:34.622Z"
+    },
+    "packages/platform/src/server/utils/crypto.ts": {
+      "hash": "87410b4adddbafbbc65fd7bb6815a8c75d1ac99f39c1ab052cf6c7aaf899bccf",
+      "size": 1257,
+      "lastScanned": "2026-06-11T08:13:34.622Z"
+    },
+    "packages/platform/src/server/utils/rate-limit-store.ts": {
+      "hash": "de5ef1748608a883aa830644634f62ad9ba8b4e0abfb9bd966a8357aef1d6d69",
+      "size": 2172,
+      "lastScanned": "2026-06-11T08:13:34.622Z"
+    },
+    "packages/platform/src/server/middleware/audit.ts": {
+      "hash": "85ea6fae48cc5980f666594c0ce423017aecae8307c781552ca665d003d54d8f",
+      "size": 2454,
+      "lastScanned": "2026-06-11T08:13:34.623Z"
+    },
+    "packages/platform/src/server/middleware/rateLimit.ts": {
+      "hash": "d7284049228077e7d1bb2ad8625f945818b03992dc9406340cf1a3d67e7fc42d",
+      "size": 1464,
+      "lastScanned": "2026-06-11T08:13:34.623Z"
+    },
+    "packages/platform/src/server/middleware/rbac.ts": {
+      "hash": "433747279b9a92045d6cb4172e537a6208ef6696c9ad6aa29f0bf8565ffc74db",
+      "size": 1030,
+      "lastScanned": "2026-06-11T08:13:34.623Z"
+    },
+    "packages/platform/src/server/middleware/urlKey.ts": {
+      "hash": "2c6d1670dc0f83ea4afabfe36b9d19a454c646c953b0b5980762a4bf3edfa0f9",
+      "size": 398,
+      "lastScanned": "2026-06-11T08:13:34.624Z"
+    },
+    "packages/platform/src/client/components/layout/BottomNav.tsx": {
+      "hash": "8f872fe1a0ef376014f4adbb4ca64b58616a95ce16f611377379a3dfa34e6d57",
+      "size": 1881,
+      "lastScanned": "2026-06-11T08:13:34.624Z"
+    },
+    "packages/platform/src/client/components/layout/Shell.tsx": {
+      "hash": "f912699e5af0ef93913ce5c9a7b57a382da49d142dfa8840c829b20c2a9a9a42",
+      "size": 1034,
+      "lastScanned": "2026-06-11T08:13:34.624Z"
+    },
+    "packages/platform/src/client/components/layout/Sidebar.tsx": {
+      "hash": "6d32ddfbceaa28d21e7c09c4ecc3183c8617d73531ed357d34dfae175a65bfd2",
+      "size": 1937,
+      "lastScanned": "2026-06-11T08:13:34.625Z"
+    },
+    "packages/platform/src/client/components/layout/TopBar.tsx": {
+      "hash": "c0ca987c5f0f9144b71ca7a0b4dcb447f88e48a55675b77e978e7ef304295fb0",
+      "size": 1813,
+      "lastScanned": "2026-06-11T08:13:34.625Z"
+    },
+    "packages/platform/src/client/components/shared/DeployProgress.tsx": {
+      "hash": "cf931a920e6f84e7d784867bb168a76be7d18abba16009c95642cbc31cc818a3",
+      "size": 2046,
+      "lastScanned": "2026-06-11T08:13:34.626Z"
+    },
+    "packages/platform/src/client/components/shared/MemoryBar.tsx": {
+      "hash": "33fc7f440141702c2703ce8684ca946182275dcc73ffc2c8200200b0a39553f1",
+      "size": 1137,
+      "lastScanned": "2026-06-11T08:13:34.626Z"
+    },
+    "packages/platform/src/client/components/shared/ServerHealthBar.tsx": {
+      "hash": "b34ee2e4edf1ddcdd5186b67beeaf672153daa0619a14a286e352199739878a0",
+      "size": 1905,
+      "lastScanned": "2026-06-11T08:13:34.626Z"
+    },
+    "packages/platform/src/client/components/shared/StatusDot.tsx": {
+      "hash": "c9ea34b3e0a1074a71aff9604ee257a8e19a6a15f230a6ff26f85e1af6b1aac5",
+      "size": 1028,
+      "lastScanned": "2026-06-11T08:13:34.626Z"
+    },
+    "packages/platform/src/server/types/express.d.ts": {
+      "hash": "0ed6132106870f61095257dca14a97aec84a2000e2b7d024d963f377048963d4",
+      "size": 192,
+      "lastScanned": "2026-06-11T08:13:34.627Z"
+    },
+    "packages/platform/src/server/services/utils/port.ts": {
+      "hash": "b8d699c180dd0f7294b57663d84578bef7cba15314a62f33eda895103668117a",
+      "size": 524,
+      "lastScanned": "2026-06-11T08:13:34.627Z"
+    },
+    "packages/platform/src/server/services/vcs/azure.ts": {
+      "hash": "ec9797c71d8a839590d6b919853687ab620a21c7177a77c827b34f34f4e4464e",
+      "size": 2829,
+      "lastScanned": "2026-06-11T08:13:34.627Z"
+    },
+    "packages/platform/src/server/services/vcs/bitbucket.ts": {
+      "hash": "c40e5723c75c2b5be07fabd84686905d133d6c5ce8373a684a7183b5e54fd2ad",
+      "size": 2515,
+      "lastScanned": "2026-06-11T08:13:34.627Z"
+    },
+    "packages/platform/src/server/services/vcs/factory.ts": {
+      "hash": "fd182bcf4e4be70eeda57ae4ddc19dc5db0a56efeb60c9fc9c1bd66857022141",
+      "size": 1629,
+      "lastScanned": "2026-06-11T08:13:34.628Z"
+    },
+    "packages/platform/src/server/services/vcs/github.ts": {
+      "hash": "d5f56d2a4e4ec61b5f3a062fd06f19e30e284598175879dc599c067ee9c7fde1",
+      "size": 2748,
+      "lastScanned": "2026-06-11T08:13:34.628Z"
+    },
+    "packages/platform/src/server/services/vcs/gitlab.ts": {
+      "hash": "bd10787f933c66a0a09522400e0c33c160d2f90920f983590c0d4a6af560bf3a",
+      "size": 2815,
+      "lastScanned": "2026-06-11T08:13:34.628Z"
+    },
+    "packages/platform/src/server/services/vcs/http.ts": {
+      "hash": "1226ff1ecd77375f19aeb5a9c16ae2a87d15df4ae55e3d8afa0df46dc2f39f60",
+      "size": 400,
+      "lastScanned": "2026-06-11T08:13:34.629Z"
+    },
+    "packages/platform/src/server/services/vcs/interface.ts": {
+      "hash": "8adc8f56f8c9d8f2dc8bb60a7913b46ffb0fdfb23731d97ee769ddffd124530b",
+      "size": 541,
+      "lastScanned": "2026-06-11T08:13:34.629Z"
+    }
+  },
+  "lastFindings": {
+    "03-platform-api.md": [
+      {
+        "line": 43,
+        "column": 14,
+        "severity": "medium",
+        "category": "secret",
+        "rule": "Database URL with Credentials",
+        "title": "Database URL with Credentials",
+        "description": "Database URLs with embedded passwords expose your database.",
+        "matched": "postgresql://dotplane:password@localhost:5432/dotplane",
+        "confidence": "medium",
+        "fix": "Move to environment variable or secrets manager"
+      }
+    ],
+    "05-ui-and-install.md": [
+      {
+        "line": 486,
+        "column": 14,
+        "severity": "medium",
+        "category": "secret",
+        "rule": "Database URL with Credentials",
+        "title": "Database URL with Credentials",
+        "description": "Database URLs with embedded passwords expose your database.",
+        "matched": "postgresql://dotplane:${DB_PASS}@localhost:5432/dotplane",
+        "confidence": "medium",
+        "fix": "Move to environment variable or secrets manager"
+      }
+    ],
+    "packages/shared/src/url.ts": [
+      {
+        "line": 1,
+        "column": 76,
+        "severity": "critical",
+        "category": "ssrf",
+        "rule": "SSRF_CLOUD_METADATA",
+        "title": "SSRF: Cloud Metadata Endpoint Access",
+        "description": "Cloud metadata endpoint in code. If URL is user-controlled, this enables credential theft.",
+        "matched": "metadata.google.internal",
+        "confidence": "medium",
+        "cwe": "CWE-918",
+        "owasp": "A10:2021",
+        "fix": "Block metadata IPs in URL validation. Use IMDSv2 on AWS (requires token header)."
+      },
+      {
+        "line": 106,
+        "column": 10,
+        "severity": "critical",
+        "category": "ssrf",
+        "rule": "SSRF_USER_URL_FETCH",
+        "title": "SSRF: User Input in fetch()",
+        "description": "User-controlled URL passed to fetch() enables SSRF. Validate against an allowlist.",
+        "matched": "fetch(input",
+        "confidence": "medium",
+        "cwe": "CWE-918",
+        "owasp": "A10:2021",
+        "fix": "Validate URL against allowlist: new URL(input).hostname must match allowed hosts"
+      },
+      {
+        "line": 145,
+        "column": 46,
+        "severity": "medium",
+        "category": "ssrf",
+        "rule": "SSRF_INTERNAL_IP",
+        "title": "SSRF: Internal IP Pattern",
+        "description": "Internal IP address in code. Verify it is not reachable via user-controlled URLs.",
+        "matched": "127.0.0.1",
+        "confidence": "low",
+        "cwe": "CWE-918",
+        "owasp": "A10:2021",
+        "fix": "Block private IP ranges in URL validation for user-supplied URLs"
+      }
+    ],
+    "packages/cli/package-lock.json": [
+      {
+        "line": 0,
+        "column": 0,
+        "severity": "high",
+        "category": "history",
+        "rule": "GIT_HISTORY_SECRET",
+        "title": "Historical Secret: Upstash Redis REST Token",
+        "description": "Secret found in current code AND in git history (commit a17ecd9dd9).",
+        "matched": "AXCvUHC5***9NP7",
+        "confidence": "medium",
+        "cwe": null,
+        "owasp": null,
+        "fix": "Remove from code, rotate the credential, then clean git history with BFG or git filter-repo"
+      }
+    ],
+    "packages/platform/package-lock.json": [
+      {
+        "line": 0,
+        "column": 0,
+        "severity": "high",
+        "category": "history",
+        "rule": "GIT_HISTORY_SECRET",
+        "title": "Historical Secret: Upstash Redis REST Token",
+        "description": "Secret found in current code AND in git history (commit a17ecd9dd9).",
+        "matched": "AXwzPfO8***cKrQ",
+        "confidence": "medium",
+        "cwe": null,
+        "owasp": null,
+        "fix": "Remove from code, rotate the credential, then clean git history with BFG or git filter-repo"
+      }
+    ],
+    ".github/workflows/release.yml": [
+      {
+        "line": 75,
+        "column": 100,
+        "severity": "high",
+        "category": "cicd",
+        "rule": "CICD_NO_LOCKFILE_INSTALL",
+        "title": "CI/CD: Install Without Lockfile",
+        "description": "CI runs npm install without --frozen-lockfile. Builds are non-deterministic.",
+        "matched": "npm install",
+        "confidence": "low",
+        "cwe": "CWE-829",
+        "owasp": "CICD-SEC-3",
+        "fix": "Use npm ci (not npm install) or yarn --frozen-lockfile in CI"
+      },
+      {
+        "line": 24,
+        "column": 9,
+        "severity": "medium",
+        "category": "cicd",
+        "rule": "CICD_UNVERIFIED_ACTION",
+        "title": "CI/CD: Unverified Third-Party Action",
+        "description": "Third-party GitHub Action not from verified publisher. Review source code.",
+        "matched": "uses: pnpm/action-setup@",
+        "confidence": "low",
+        "cwe": "CWE-829",
+        "owasp": "CICD-SEC-8",
+        "fix": "Pin to commit SHA, review the action source, or use an official alternative"
+      },
+      {
+        "line": 45,
+        "column": 9,
+        "severity": "medium",
+        "category": "cicd",
+        "rule": "CICD_UNVERIFIED_ACTION",
+        "title": "CI/CD: Unverified Third-Party Action",
+        "description": "Third-party GitHub Action not from verified publisher. Review source code.",
+        "matched": "uses: softprops/action-gh-release@",
+        "confidence": "low",
+        "cwe": "CWE-829",
+        "owasp": "CICD-SEC-8",
+        "fix": "Pin to commit SHA, review the action source, or use an official alternative"
+      }
+    ],
+    "docs/ci-examples/azure-pipelines.yml": [
+      {
+        "line": 75,
+        "column": 21,
+        "severity": "high",
+        "category": "cicd",
+        "rule": "CICD_NO_LOCKFILE_INSTALL",
+        "title": "CI/CD: Install Without Lockfile",
+        "description": "CI runs npm install without --frozen-lockfile. Builds are non-deterministic.",
+        "matched": "npm install",
+        "confidence": "low",
+        "cwe": "CWE-829",
+        "owasp": "CICD-SEC-3",
+        "fix": "Use npm ci (not npm install) or yarn --frozen-lockfile in CI"
+      }
+    ],
+    "docs/ci-examples/bitbucket-pipelines.yml": [
+      {
+        "line": 40,
+        "column": 13,
+        "severity": "high",
+        "category": "cicd",
+        "rule": "CICD_NO_LOCKFILE_INSTALL",
+        "title": "CI/CD: Install Without Lockfile",
+        "description": "CI runs npm install without --frozen-lockfile. Builds are non-deterministic.",
+        "matched": "npm install",
+        "confidence": "low",
+        "cwe": "CWE-829",
+        "owasp": "CICD-SEC-3",
+        "fix": "Use npm ci (not npm install) or yarn --frozen-lockfile in CI"
+      }
+    ],
+    "packages/platform/src/server/api/provision.ts": [
+      {
+        "line": 25,
+        "column": 1,
+        "severity": "high",
+        "category": "api",
+        "rule": "API_NO_AUTH_CHECK",
+        "title": "API: Route Without Auth Check",
+        "description": "State-changing API route without visible auth middleware. Verify authentication is enforced.",
+        "matched": "router.post('/', async (req",
+        "confidence": "medium",
+        "cwe": "CWE-306",
+        "owasp": "A07:2021",
+        "fix": "Add auth middleware: router.post(\"/api/data\", authMiddleware, handler)"
+      },
+      {
+        "line": 66,
+        "column": 1,
+        "severity": "high",
+        "category": "api",
+        "rule": "API_NO_AUTH_CHECK",
+        "title": "API: Route Without Auth Check",
+        "description": "State-changing API route without visible auth middleware. Verify authentication is enforced.",
+        "matched": "router.delete('/:id', async (req",
+        "confidence": "low",
+        "cwe": "CWE-306",
+        "owasp": "A07:2021",
+        "fix": "Add auth middleware: router.post(\"/api/data\", authMiddleware, handler)"
+      },
+      {
+        "line": 26,
+        "column": 48,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 66,
+        "column": 1,
+        "severity": "high",
+        "category": "injection",
+        "rule": "VIBE_UNPROTECTED_DELETE",
+        "title": "Vibe Code: DELETE Endpoint Without Auth Check",
+        "description": "DELETE endpoint defined without visible auth middleware. AI often generates CRUD routes without access control.",
+        "matched": "router.delete('/:id', async (req",
+        "confidence": "low",
+        "cwe": "CWE-306",
+        "owasp": "A01:2021",
+        "fix": "Add authentication middleware: router.delete(\"/resource/:id\", authMiddleware, handler)"
+      }
+    ],
+    "packages/platform/src/server/api/servers.ts": [
+      {
+        "line": 106,
+        "column": 1,
+        "severity": "high",
+        "category": "api",
+        "rule": "API_SECRET_IN_URL",
+        "title": "API: Sensitive Data in URL Parameters",
+        "description": "Sensitive data in URL parameters gets logged in server logs, browser history, and proxies.",
+        "matched": "router.get('/agent-bootstrap/:token",
+        "confidence": "high",
+        "cwe": "CWE-598",
+        "owasp": "A04:2021",
+        "fix": "Move sensitive data to request headers or body"
+      },
+      {
+        "line": 122,
+        "column": 1,
+        "severity": "high",
+        "category": "api",
+        "rule": "API_SECRET_IN_URL",
+        "title": "API: Sensitive Data in URL Parameters",
+        "description": "Sensitive data in URL parameters gets logged in server logs, browser history, and proxies.",
+        "matched": "router.get('/agent-install/:token",
+        "confidence": "high",
+        "cwe": "CWE-598",
+        "owasp": "A04:2021",
+        "fix": "Move sensitive data to request headers or body"
+      },
+      {
+        "line": 149,
+        "column": 1,
+        "severity": "high",
+        "category": "api",
+        "rule": "API_DEBUG_ENDPOINT",
+        "title": "API: Debug/Test Endpoint in Code",
+        "description": "Debug/test/admin endpoint detected. Ensure it is not accessible in production.",
+        "matched": "router.post('/internal",
+        "confidence": "high",
+        "cwe": "CWE-489",
+        "owasp": "A05:2021",
+        "fix": "Remove debug endpoints or protect with auth + environment check"
+      },
+      {
+        "line": 118,
+        "column": 40,
+        "severity": "high",
+        "category": "llm",
+        "rule": "AGENT_ESCALATED_PERMISSIONS",
+        "title": "Agent: Runs With Elevated Permissions",
+        "description": "Agent configured with elevated permissions (admin, root, service-role). Prompt injection inherits these privileges.",
+        "matched": "agent-install/${routeParam(req, 'token')}\" | sudo",
+        "confidence": "medium",
+        "cwe": "CWE-269",
+        "owasp": "A04:2021",
+        "fix": "Apply principle of least privilege. Agents should have minimal permissions required for their specific task."
+      },
+      {
+        "line": 308,
+        "column": 19,
+        "severity": "high",
+        "category": "llm",
+        "rule": "AGENT_ESCALATED_PERMISSIONS",
+        "title": "Agent: Runs With Elevated Permissions",
+        "description": "Agent configured with elevated permissions (admin, root, service-role). Prompt injection inherits these privileges.",
+        "matched": "agent-install-token', requireRole('superadmin",
+        "confidence": "medium",
+        "cwe": "CWE-269",
+        "owasp": "A04:2021",
+        "fix": "Apply principle of least privilege. Agents should have minimal permissions required for their specific task."
+      },
+      {
+        "line": 150,
+        "column": 44,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 223,
+        "column": 45,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 262,
+        "column": 45,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      }
+    ],
+    "packages/platform/src/server/api/settings.ts": [
+      {
+        "line": 51,
+        "column": 1,
+        "severity": "high",
+        "category": "api",
+        "rule": "API_SECRET_IN_URL",
+        "title": "API: Sensitive Data in URL Parameters",
+        "description": "Sensitive data in URL parameters gets logged in server logs, browser history, and proxies.",
+        "matched": "router.get('/:key",
+        "confidence": "medium",
+        "cwe": "CWE-598",
+        "owasp": "A04:2021",
+        "fix": "Move sensitive data to request headers or body"
+      },
+      {
+        "line": 67,
+        "column": 47,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 94,
+        "column": 38,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      }
+    ],
+    "packages/platform/src/server/api/users.ts": [
+      {
+        "line": 188,
+        "column": 1,
+        "severity": "high",
+        "category": "api",
+        "rule": "API_NO_AUTH_CHECK",
+        "title": "API: Route Without Auth Check",
+        "description": "State-changing API route without visible auth middleware. Verify authentication is enforced.",
+        "matched": "router.post('/invites/accept', async (req",
+        "confidence": "medium",
+        "cwe": "CWE-306",
+        "owasp": "A07:2021",
+        "fix": "Add auth middleware: router.post(\"/api/data\", authMiddleware, handler)"
+      },
+      {
+        "line": 81,
+        "column": 43,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 116,
+        "column": 43,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 166,
+        "column": 39,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 189,
+        "column": 45,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      }
+    ],
+    "packages/platform/src/server/auth/routes.ts": [
+      {
+        "line": 310,
+        "column": 1,
+        "severity": "high",
+        "category": "api",
+        "rule": "API_NO_AUTH_CHECK",
+        "title": "API: Route Without Auth Check",
+        "description": "State-changing API route without visible auth middleware. Verify authentication is enforced.",
+        "matched": "router.post('/logout', async (req",
+        "confidence": "low",
+        "cwe": "CWE-306",
+        "owasp": "A07:2021",
+        "fix": "Add auth middleware: router.post(\"/api/data\", authMiddleware, handler)"
+      },
+      {
+        "line": 65,
+        "column": 17,
+        "severity": "medium",
+        "category": "auth",
+        "rule": "COOKIE_NO_HTTPONLY",
+        "title": "Cookie Missing httpOnly Flag",
+        "description": "Cookies without httpOnly can be stolen via XSS. Set httpOnly: true.",
+        "matched": "CookiePath",
+        "confidence": "medium",
+        "cwe": "CWE-1004",
+        "owasp": "A05:2021",
+        "fix": "Add httpOnly: true to cookie options"
+      },
+      {
+        "line": 75,
+        "column": 18,
+        "severity": "medium",
+        "category": "auth",
+        "rule": "COOKIE_NO_HTTPONLY",
+        "title": "Cookie Missing httpOnly Flag",
+        "description": "Cookies without httpOnly can be stolen via XSS. Set httpOnly: true.",
+        "matched": "CookiePath",
+        "confidence": "medium",
+        "cwe": "CWE-1004",
+        "owasp": "A05:2021",
+        "fix": "Add httpOnly: true to cookie options"
+      },
+      {
+        "line": 80,
+        "column": 12,
+        "severity": "medium",
+        "category": "auth",
+        "rule": "COOKIE_NO_HTTPONLY",
+        "title": "Cookie Missing httpOnly Flag",
+        "description": "Cookies without httpOnly can be stolen via XSS. Set httpOnly: true.",
+        "matched": "Cookie('refresh_token', { path: refreshCookiePath",
+        "confidence": "medium",
+        "cwe": "CWE-1004",
+        "owasp": "A05:2021",
+        "fix": "Add httpOnly: true to cookie options"
+      },
+      {
+        "line": 208,
+        "column": 14,
+        "severity": "medium",
+        "category": "auth",
+        "rule": "NO_RATE_LIMIT_LOGIN",
+        "title": "No Rate Limiting on Authentication",
+        "description": "Auth endpoints without rate limiting are vulnerable to brute-force attacks.",
+        "matched": "/login'",
+        "confidence": "low",
+        "cwe": "CWE-307",
+        "owasp": "A07:2021",
+        "fix": "Add rate limiting: express-rate-limit, @upstash/ratelimit, or Cloudflare rules"
+      },
+      {
+        "line": 209,
+        "column": 38,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 326,
+        "column": 45,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 425,
+        "column": 47,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 478,
+        "column": 43,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      }
+    ],
+    "packages/platform/src/server/services/upload.service.ts": [
+      {
+        "line": 20,
+        "column": 30,
+        "severity": "high",
+        "category": "api",
+        "rule": "API_UPLOAD_NO_TYPE_CHECK",
+        "title": "API: File Upload Without Type Validation",
+        "description": "File upload using original filename without type validation.",
+        "matched": "filename)",
+        "confidence": "low",
+        "cwe": "CWE-434",
+        "owasp": "A04:2021",
+        "fix": "Validate file extension and MIME type. Generate random filenames for storage."
+      },
+      {
+        "line": 29,
+        "column": 52,
+        "severity": "high",
+        "category": "api",
+        "rule": "API_UPLOAD_NO_TYPE_CHECK",
+        "title": "API: File Upload Without Type Validation",
+        "description": "File upload using original filename without type validation.",
+        "matched": "filename)",
+        "confidence": "low",
+        "cwe": "CWE-434",
+        "owasp": "A04:2021",
+        "fix": "Validate file extension and MIME type. Generate random filenames for storage."
+      },
+      {
+        "line": 45,
+        "column": 38,
+        "severity": "high",
+        "category": "api",
+        "rule": "API_UPLOAD_NO_TYPE_CHECK",
+        "title": "API: File Upload Without Type Validation",
+        "description": "File upload using original filename without type validation.",
+        "matched": "originalname)",
+        "confidence": "low",
+        "cwe": "CWE-434",
+        "owasp": "A04:2021",
+        "fix": "Validate file extension and MIME type. Generate random filenames for storage."
+      },
+      {
+        "line": 53,
+        "column": 33,
+        "severity": "high",
+        "category": "api",
+        "rule": "API_UPLOAD_NO_TYPE_CHECK",
+        "title": "API: File Upload Without Type Validation",
+        "description": "File upload using original filename without type validation.",
+        "matched": "originalname)",
+        "confidence": "low",
+        "cwe": "CWE-434",
+        "owasp": "A04:2021",
+        "fix": "Validate file extension and MIME type. Generate random filenames for storage."
+      },
+      {
+        "line": 69,
+        "column": 28,
+        "severity": "high",
+        "category": "api",
+        "rule": "API_UPLOAD_NO_TYPE_CHECK",
+        "title": "API: File Upload Without Type Validation",
+        "description": "File upload using original filename without type validation.",
+        "matched": "filename)",
+        "confidence": "low",
+        "cwe": "CWE-434",
+        "owasp": "A04:2021",
+        "fix": "Validate file extension and MIME type. Generate random filenames for storage."
+      },
+      {
+        "line": 70,
+        "column": 53,
+        "severity": "high",
+        "category": "api",
+        "rule": "API_UPLOAD_NO_TYPE_CHECK",
+        "title": "API: File Upload Without Type Validation",
+        "description": "File upload using original filename without type validation.",
+        "matched": "filename)",
+        "confidence": "low",
+        "cwe": "CWE-434",
+        "owasp": "A04:2021",
+        "fix": "Validate file extension and MIME type. Generate random filenames for storage."
+      },
+      {
+        "line": 77,
+        "column": 35,
+        "severity": "high",
+        "category": "api",
+        "rule": "API_UPLOAD_NO_TYPE_CHECK",
+        "title": "API: File Upload Without Type Validation",
+        "description": "File upload using original filename without type validation.",
+        "matched": "filename)",
+        "confidence": "low",
+        "cwe": "CWE-434",
+        "owasp": "A04:2021",
+        "fix": "Validate file extension and MIME type. Generate random filenames for storage."
+      },
+      {
+        "line": 62,
+        "column": 31,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_UNRESTRICTED_UPLOAD",
+        "title": "API: Unrestricted File Upload",
+        "description": "File upload handler detected. Ensure file type validation, size limits, and secure storage.",
+        "matched": "multer(",
+        "confidence": "low",
+        "cwe": "CWE-434",
+        "owasp": "A04:2021",
+        "fix": "Add: fileFilter, limits: { fileSize: 5*1024*1024 }, and validate MIME type"
+      }
+    ],
+    "packages/agent/src/services/caddy.service.ts": [
+      {
+        "line": 7,
+        "column": 7,
+        "severity": "high",
+        "category": "llm",
+        "rule": "AGENT_ESCALATED_PERMISSIONS",
+        "title": "Agent: Runs With Elevated Permissions",
+        "description": "Agent configured with elevated permissions (admin, root, service-role). Prompt injection inherits these privileges.",
+        "matched": "agentConfig.caddyAdmin",
+        "confidence": "low",
+        "cwe": "CWE-269",
+        "owasp": "A04:2021",
+        "fix": "Apply principle of least privilege. Agents should have minimal permissions required for their specific task."
+      },
+      {
+        "line": 8,
+        "column": 39,
+        "severity": "high",
+        "category": "llm",
+        "rule": "AGENT_ESCALATED_PERMISSIONS",
+        "title": "Agent: Runs With Elevated Permissions",
+        "description": "Agent configured with elevated permissions (admin, root, service-role). Prompt injection inherits these privileges.",
+        "matched": "agentConfig.caddyAdmin",
+        "confidence": "low",
+        "cwe": "CWE-269",
+        "owasp": "A04:2021",
+        "fix": "Apply principle of least privilege. Agents should have minimal permissions required for their specific task."
+      },
+      {
+        "line": 67,
+        "column": 30,
+        "severity": "high",
+        "category": "llm",
+        "rule": "AGENT_ESCALATED_PERMISSIONS",
+        "title": "Agent: Runs With Elevated Permissions",
+        "description": "Agent configured with elevated permissions (admin, root, service-role). Prompt injection inherits these privileges.",
+        "matched": "agentConfig.caddyAdmin",
+        "confidence": "low",
+        "cwe": "CWE-269",
+        "owasp": "A04:2021",
+        "fix": "Apply principle of least privilege. Agents should have minimal permissions required for their specific task."
+      }
+    ],
+    "packages/agent/src/services/systemd.service.ts": [
+      {
+        "line": 64,
+        "column": 20,
+        "severity": "high",
+        "category": "llm",
+        "rule": "AGENT_ESCALATED_PERMISSIONS",
+        "title": "Agent: Runs With Elevated Permissions",
+        "description": "Agent configured with elevated permissions (admin, root, service-role). Prompt injection inherits these privileges.",
+        "matched": "agentConfig.instancesRoot",
+        "confidence": "low",
+        "cwe": "CWE-269",
+        "owasp": "A04:2021",
+        "fix": "Apply principle of least privilege. Agents should have minimal permissions required for their specific task."
+      }
+    ],
+    "packages/platform/src/server/auth/deploy-token.ts": [
+      {
+        "line": 7,
+        "column": 8,
+        "severity": "high",
+        "category": "llm",
+        "rule": "AGENT_CREDENTIAL_FORWARDING",
+        "title": "Agent: Credentials Passed Between Tools",
+        "description": "Agent forwards credentials between tools or to external services. Compromised tools can steal credentials.",
+        "matched": "function deployTokenAuth(req: Request, res: Response, next: Next",
+        "confidence": "medium",
+        "cwe": "CWE-522",
+        "owasp": "A07:2021",
+        "fix": "Scope credentials per-tool. Never forward authentication tokens between tool invocations."
+      }
+    ],
+    "packages/platform/src/server/cli.ts": [
+      {
+        "line": 85,
+        "column": 5,
+        "severity": "high",
+        "category": "config",
+        "rule": "PII_IN_CONSOLE_LOG",
+        "title": "Privacy: PII Logged to Console",
+        "description": "PII fields logged to console. Log output may be stored in log aggregation services, exposing sensitive user data.",
+        "matched": "console.log(`Password",
+        "confidence": "high",
+        "cwe": "CWE-532",
+        "owasp": "A09:2021",
+        "fix": "Remove PII from log statements. Use structured logging with PII redaction: logger.info({ userId: user.id }) instead of logging full user objects."
+      },
+      {
+        "line": 57,
+        "column": 13,
+        "severity": "medium",
+        "category": "ssrf",
+        "rule": "SSRF_INTERNAL_IP",
+        "title": "SSRF: Internal IP Pattern",
+        "description": "Internal IP address in code. Verify it is not reachable via user-controlled URLs.",
+        "matched": "127.0.0.1",
+        "confidence": "low",
+        "cwe": "CWE-918",
+        "owasp": "A10:2021",
+        "fix": "Block private IP ranges in URL validation for user-supplied URLs"
+      },
+      {
+        "line": 115,
+        "column": 22,
+        "severity": "medium",
+        "category": "ssrf",
+        "rule": "SSRF_INTERNAL_IP",
+        "title": "SSRF: Internal IP Pattern",
+        "description": "Internal IP address in code. Verify it is not reachable via user-controlled URLs.",
+        "matched": "127.0.0.1",
+        "confidence": "low",
+        "cwe": "CWE-918",
+        "owasp": "A10:2021",
+        "fix": "Block private IP ranges in URL validation for user-supplied URLs"
+      },
+      {
+        "line": 98,
+        "column": 5,
+        "severity": "medium",
+        "category": "config",
+        "rule": "PII_IP_LOGGING",
+        "title": "Privacy: IP Address Logged Without Anonymization",
+        "description": "IP addresses logged without anonymization. Under GDPR, IP addresses are personal data.",
+        "matched": "console.log(`Panel URL: https://${anonymizeIp(ip",
+        "confidence": "medium",
+        "cwe": "CWE-532",
+        "owasp": "A09:2021",
+        "fix": "Anonymize IP addresses in logs: mask the last octet (192.168.1.xxx) or hash before logging."
+      },
+      {
+        "line": 289,
+        "column": 5,
+        "severity": "medium",
+        "category": "config",
+        "rule": "PII_IP_LOGGING",
+        "title": "Privacy: IP Address Logged Without Anonymization",
+        "description": "IP addresses logged without anonymization. Under GDPR, IP addresses are personal data.",
+        "matched": "console.log(`Unbanned ${anonymizeIp(ip",
+        "confidence": "medium",
+        "cwe": "CWE-532",
+        "owasp": "A09:2021",
+        "fix": "Anonymize IP addresses in logs: mask the last octet (192.168.1.xxx) or hash before logging."
+      }
+    ],
+    "packages/cli/src/config.ts": [
+      {
+        "line": 19,
+        "column": 0,
+        "severity": "high",
+        "category": "supply-chain",
+        "rule": "AGENT_MANIFEST_NO_SIGNATURE",
+        "title": "Agent: Manifest loaded without signature verification",
+        "description": "Agent manifest is loaded/parsed without a subsequent signature or integrity check — manifest tampering goes undetected.",
+        "matched": "",
+        "confidence": "low",
+        "cwe": "CWE-345",
+        "owasp": "ASI-10",
+        "fix": "Verify manifest signature or compute expected SHA-256 before trusting its contents."
+      },
+      {
+        "line": 34,
+        "column": 0,
+        "severity": "high",
+        "category": "supply-chain",
+        "rule": "AGENT_MANIFEST_NO_SIGNATURE",
+        "title": "Agent: Manifest loaded without signature verification",
+        "description": "Agent manifest is loaded/parsed without a subsequent signature or integrity check — manifest tampering goes undetected.",
+        "matched": "",
+        "confidence": "low",
+        "cwe": "CWE-345",
+        "owasp": "ASI-10",
+        "fix": "Verify manifest signature or compute expected SHA-256 before trusting its contents."
+      }
+    ],
+    "packages/cli/src/index.ts": [
+      {
+        "line": 26,
+        "column": 0,
+        "severity": "high",
+        "category": "supply-chain",
+        "rule": "AGENT_MANIFEST_NO_SIGNATURE",
+        "title": "Agent: Manifest loaded without signature verification",
+        "description": "Agent manifest is loaded/parsed without a subsequent signature or integrity check — manifest tampering goes undetected.",
+        "matched": "",
+        "confidence": "low",
+        "cwe": "CWE-345",
+        "owasp": "ASI-10",
+        "fix": "Verify manifest signature or compute expected SHA-256 before trusting its contents."
+      }
+    ],
+    "packages/platform/src/client/App.tsx": [
+      {
+        "line": 25,
+        "column": 22,
+        "severity": "medium",
+        "category": "auth",
+        "rule": "NO_RATE_LIMIT_LOGIN",
+        "title": "No Rate Limiting on Authentication",
+        "description": "Auth endpoints without rate limiting are vulnerable to brute-force attacks.",
+        "matched": "/login\"",
+        "confidence": "low",
+        "cwe": "CWE-307",
+        "owasp": "A07:2021",
+        "fix": "Add rate limiting: express-rate-limit, @upstash/ratelimit, or Cloudflare rules"
+      }
+    ],
+    "packages/platform/src/client/components/AuthGuard.tsx": [
+      {
+        "line": 13,
+        "column": 26,
+        "severity": "medium",
+        "category": "auth",
+        "rule": "NO_RATE_LIMIT_LOGIN",
+        "title": "No Rate Limiting on Authentication",
+        "description": "Auth endpoints without rate limiting are vulnerable to brute-force attacks.",
+        "matched": "/login\"",
+        "confidence": "low",
+        "cwe": "CWE-307",
+        "owasp": "A07:2021",
+        "fix": "Add rate limiting: express-rate-limit, @upstash/ratelimit, or Cloudflare rules"
+      }
+    ],
+    "packages/platform/src/server/api/apps.ts": [
+      {
+        "line": 146,
+        "column": 20,
+        "severity": "medium",
+        "category": "auth",
+        "rule": "TIMING_ATTACK_COMPARISON",
+        "title": "Timing Attack: String Comparison",
+        "description": "Direct string comparison of secrets is vulnerable to timing attacks.",
+        "matched": "Token !== ",
+        "confidence": "medium",
+        "cwe": "CWE-208",
+        "owasp": "A02:2021",
+        "fix": "Use crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b))"
+      },
+      {
+        "line": 78,
+        "column": 42,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 123,
+        "column": 42,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      }
+    ],
+    "packages/platform/src/server/api/webhooks.ts": [
+      {
+        "line": 122,
+        "column": 21,
+        "severity": "medium",
+        "category": "auth",
+        "rule": "TIMING_ATTACK_COMPARISON",
+        "title": "Timing Attack: String Comparison",
+        "description": "Direct string comparison of secrets is vulnerable to timing attacks.",
+        "matched": "secret !== ",
+        "confidence": "medium",
+        "cwe": "CWE-208",
+        "owasp": "A02:2021",
+        "fix": "Use crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b))"
+      },
+      {
+        "line": 62,
+        "column": 46,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 93,
+        "column": 46,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      }
+    ],
+    "packages/platform/src/server/auth/tokens.ts": [
+      {
+        "line": 22,
+        "column": 10,
+        "severity": "medium",
+        "category": "auth",
+        "rule": "JWT_NO_EXPIRY",
+        "title": "JWT Without Expiration",
+        "description": "JWTs without expiration never expire. Set a short expiresIn (15m-1h).",
+        "matched": "jwt.sign(payload, requireEnv('JWT_SECRET')",
+        "confidence": "medium",
+        "cwe": "CWE-613",
+        "owasp": "A07:2021",
+        "fix": "Add { expiresIn: \"15m\" } to jwt.sign() options"
+      },
+      {
+        "line": 33,
+        "column": 10,
+        "severity": "medium",
+        "category": "auth",
+        "rule": "JWT_NO_EXPIRY",
+        "title": "JWT Without Expiration",
+        "description": "JWTs without expiration never expire. Set a short expiresIn (15m-1h).",
+        "matched": "jwt.sign(payload, requireEnv('JWT_SECRET')",
+        "confidence": "medium",
+        "cwe": "CWE-613",
+        "owasp": "A07:2021",
+        "fix": "Add { expiresIn: \"15m\" } to jwt.sign() options"
+      }
+    ],
+    "packages/platform/src/client/components/layout/TopBar.tsx": [
+      {
+        "line": 19,
+        "column": 15,
+        "severity": "medium",
+        "category": "auth",
+        "rule": "NO_RATE_LIMIT_LOGIN",
+        "title": "No Rate Limiting on Authentication",
+        "description": "Auth endpoints without rate limiting are vulnerable to brute-force attacks.",
+        "matched": "/login'",
+        "confidence": "low",
+        "cwe": "CWE-307",
+        "owasp": "A07:2021",
+        "fix": "Add rate limiting: express-rate-limit, @upstash/ratelimit, or Cloudflare rules"
+      }
+    ],
+    "packages/agent/src/config.ts": [
+      {
+        "line": 42,
+        "column": 36,
+        "severity": "medium",
+        "category": "ssrf",
+        "rule": "SSRF_INTERNAL_IP",
+        "title": "SSRF: Internal IP Pattern",
+        "description": "Internal IP address in code. Verify it is not reachable via user-controlled URLs.",
+        "matched": "127.0.0.1",
+        "confidence": "low",
+        "cwe": "CWE-918",
+        "owasp": "A10:2021",
+        "fix": "Block private IP ranges in URL validation for user-supplied URLs"
+      }
+    ],
+    "packages/platform/src/server/index.ts": [
+      {
+        "line": 128,
+        "column": 46,
+        "severity": "medium",
+        "category": "ssrf",
+        "rule": "SSRF_INTERNAL_IP",
+        "title": "SSRF: Internal IP Pattern",
+        "description": "Internal IP address in code. Verify it is not reachable via user-controlled URLs.",
+        "matched": "127.0.0.1",
+        "confidence": "low",
+        "cwe": "CWE-918",
+        "owasp": "A10:2021",
+        "fix": "Block private IP ranges in URL validation for user-supplied URLs"
+      },
+      {
+        "line": 62,
+        "column": 3,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 63,
+        "column": 3,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 64,
+        "column": 3,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 65,
+        "column": 3,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 66,
+        "column": 3,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 67,
+        "column": 3,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 73,
+        "column": 3,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 79,
+        "column": 3,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 81,
+        "column": 3,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 82,
+        "column": 3,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 95,
+        "column": 3,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 99,
+        "column": 5,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 100,
+        "column": 5,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 111,
+        "column": 3,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 132,
+        "column": 3,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.listen(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      }
+    ],
+    "packages/platform/src/server/services/deploy.service.ts": [
+      {
+        "line": 308,
+        "column": 20,
+        "severity": "medium",
+        "category": "ssrf",
+        "rule": "SSRF_INTERNAL_IP",
+        "title": "SSRF: Internal IP Pattern",
+        "description": "Internal IP address in code. Verify it is not reachable via user-controlled URLs.",
+        "matched": "127.0.0.1",
+        "confidence": "low",
+        "cwe": "CWE-918",
+        "owasp": "A10:2021",
+        "fix": "Block private IP ranges in URL validation for user-supplied URLs"
+      }
+    ],
+    "packages/agent/src/api/fail2ban.ts": [
+      {
+        "line": 26,
+        "column": 42,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      }
+    ],
+    "packages/agent/src/api/firewall.ts": [
+      {
+        "line": 28,
+        "column": 34,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      }
+    ],
+    "packages/agent/src/api/instances.ts": [
+      {
+        "line": 48,
+        "column": 35,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 69,
+        "column": 35,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 101,
+        "column": 63,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      }
+    ],
+    "packages/agent/src/api/runtime.ts": [
+      {
+        "line": 26,
+        "column": 64,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      }
+    ],
+    "packages/agent/src/api/sdk.ts": [
+      {
+        "line": 25,
+        "column": 43,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      }
+    ],
+    "packages/platform/src/server/api/audit.ts": [
+      {
+        "line": 74,
+        "column": 3,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_EXCESSIVE_DATA",
+        "title": "API: Returning Full Database Object",
+        "description": "Returning full DB objects may expose sensitive fields (password, email, etc.).",
+        "matched": "res.json(row)",
+        "confidence": "low",
+        "cwe": "CWE-200",
+        "owasp": "A01:2021",
+        "fix": "Select specific fields: res.json({ id: user.id, name: user.name })"
+      }
+    ],
+    "packages/platform/src/server/api/instances.ts": [
+      {
+        "line": 153,
+        "column": 47,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 214,
+        "column": 41,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 237,
+        "column": 42,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 305,
+        "column": 44,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      }
+    ],
+    "packages/platform/src/server/api/pg.ts": [
+      {
+        "line": 70,
+        "column": 47,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 99,
+        "column": 47,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 168,
+        "column": 42,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 196,
+        "column": 52,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      }
+    ],
+    "packages/platform/src/server/api/releases.ts": [
+      {
+        "line": 42,
+        "column": 37,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      },
+      {
+        "line": 93,
+        "column": 46,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      }
+    ],
+    "packages/platform/src/server/api/sdk.ts": [
+      {
+        "line": 54,
+        "column": 40,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      }
+    ],
+    "packages/platform/src/server/middleware/audit.ts": [
+      {
+        "line": 74,
+        "column": 26,
+        "severity": "medium",
+        "category": "api",
+        "rule": "API_NO_VALIDATION",
+        "title": "API: No Input Validation",
+        "description": "Request body used without validation. Validate with Zod, Joi, or Yup.",
+        "matched": "req.body)",
+        "confidence": "low",
+        "cwe": "CWE-20",
+        "owasp": "A03:2021",
+        "fix": "Validate: const data = schema.parse(req.body) using Zod or similar"
+      }
+    ],
+    "C:/Users/ArvindSawant/.cursor/mcp.json": [
+      {
+        "line": 1,
+        "column": 0,
+        "severity": "medium",
+        "category": "llm",
+        "rule": "MCP_SHADOW_CONFIG",
+        "title": "MCP: 1 Shadow Server(s) in User Config",
+        "description": "Found 1 MCP server(s) configured outside the project in C:\\Users\\ArvindSawant\\.cursor\\mcp.json. These operate outside your project's security controls.",
+        "matched": "codegraph",
+        "confidence": "medium",
+        "cwe": "CWE-269",
+        "owasp": "A05:2021",
+        "fix": "Review shadow MCP servers. Move project-specific servers to the project mcp.json and track in version control."
+      }
+    ],
+    "packages/platform/src/client/main.tsx": [
+      {
+        "line": 27,
+        "column": 1,
+        "severity": "medium",
+        "category": "injection",
+        "rule": "EXCEPTION_NO_ERROR_BOUNDARY",
+        "title": "Exception: React App Without Error Boundary",
+        "description": "React app rendered without an Error Boundary. Unhandled component errors will crash the entire UI.",
+        "matched": "createRoot(root)",
+        "confidence": "low",
+        "cwe": "CWE-755",
+        "owasp": "A10:2025",
+        "fix": "Wrap your app: <ErrorBoundary fallback={<ErrorPage />}><App /></ErrorBoundary>"
+      }
+    ],
+    "packages/agent/src/index.ts": [
+      {
+        "line": 18,
+        "column": 1,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 19,
+        "column": 1,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 21,
+        "column": 1,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 22,
+        "column": 1,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 23,
+        "column": 1,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 24,
+        "column": 1,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 25,
+        "column": 1,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 26,
+        "column": 1,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 27,
+        "column": 1,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 28,
+        "column": 1,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      },
+      {
+        "line": 30,
+        "column": 1,
+        "severity": "low",
+        "category": "api",
+        "rule": "API_NO_SECURITY_HEADERS",
+        "title": "API: Missing Security Headers (Helmet)",
+        "description": "Express app without helmet middleware. Missing security headers (CSP, HSTS, etc.).",
+        "matched": "app.use(",
+        "confidence": "low",
+        "cwe": "CWE-693",
+        "owasp": "A05:2021",
+        "fix": "Add helmet: app.use(helmet()) for automatic security headers"
+      }
+    ]
+  },
+  "stats": {
+    "totalFiles": 160,
+    "totalFindings": 124,
+    "lastScore": 4.8,
+    "lastGrade": "F"
+  }
+}

@@ -8,6 +8,8 @@ import { decrypt, encrypt } from '../utils/crypto.js'
 
 import { routeParam } from './helpers.js'
 
+const SettingKeySchema = z.string().regex(/^[a-z0-9_]+$/).max(100)
+
 const router: Router = Router()
 
 const SENSITIVE_KEYS = new Set([
@@ -49,7 +51,13 @@ router.get('/', requireRole('superadmin'), (_req, res) => {
 })
 
 router.get('/:key', requireRole('superadmin'), (req, res) => {
-  const row = db.select().from(settings).where(eq(settings.key, routeParam(req, 'key'))).get()
+  const keyResult = SettingKeySchema.safeParse(routeParam(req, 'key'))
+  if (!keyResult.success) {
+    res.status(400).json({ error: 'Invalid setting key' })
+    return
+  }
+
+  const row = db.select().from(settings).where(eq(settings.key, keyResult.data)).get()
   if (!row) {
     res.status(404).json({ error: 'Setting not found' })
     return
@@ -98,7 +106,13 @@ router.put('/:key', requireRole('superadmin'), (req, res) => {
     return
   }
 
-  const key = routeParam(req, 'key')
+  const keyResult = SettingKeySchema.safeParse(routeParam(req, 'key'))
+  if (!keyResult.success) {
+    res.status(400).json({ error: 'Invalid setting key' })
+    return
+  }
+
+  const key = keyResult.data
   const rawValue = typeof body.data.value === 'string' ? body.data.value : JSON.stringify(body.data.value)
   const isSensitive = SENSITIVE_KEYS.has(key)
   const storedValue = isSensitive ? encrypt(rawValue) : rawValue

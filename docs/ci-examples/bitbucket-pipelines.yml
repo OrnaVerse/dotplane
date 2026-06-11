@@ -37,7 +37,7 @@ definitions:
         image: node:20
         trigger: manual
         script:
-          - npm install -g @dotplane/cli
+          - npm install -g @dotplane/cli@${DOTPLANE_CLI_VERSION}
           - |
             dotplane-remote login \
               --url "${DOTPLANE_BASE_URL}" \

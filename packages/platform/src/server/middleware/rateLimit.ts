@@ -6,6 +6,24 @@ function clientKey(req: Request): string {
   return req.user?.userId?.toString() ?? req.ip ?? 'unknown'
 }
 
+export const refreshRateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  store: new SqliteRateLimitStore('refresh:'),
+  message: { error: 'Too many refresh attempts, try again in 1 minute' },
+})
+
+export const agentCallbackRateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  store: new SqliteRateLimitStore('agent-callback:'),
+  message: { error: 'Too many agent callback requests' },
+})
+
 export const loginRateLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 5,

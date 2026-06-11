@@ -1,6 +1,7 @@
 import fs from 'fs'
 import os from 'os'
 import path from 'path'
+import { z } from 'zod'
 
 export interface DotplaneConfig {
   url: string
@@ -8,6 +9,13 @@ export interface DotplaneConfig {
   token?: string
   username?: string
 }
+
+const ConfigSchema = z.object({
+  url: z.string().url(),
+  urlKey: z.string().min(1).max(64),
+  token: z.string().min(1).optional(),
+  username: z.string().min(1).max(64).optional(),
+})
 
 const CONFIG_DIR = path.join(os.homedir(), '.dotplane')
 const CONFIG_PATH = path.join(CONFIG_DIR, 'config.json')
@@ -19,15 +27,18 @@ export function getConfigPath(): string {
 export function loadConfig(): DotplaneConfig | null {
   try {
     const raw = fs.readFileSync(CONFIG_PATH, 'utf8')
-    return JSON.parse(raw) as DotplaneConfig
+    const parsed = ConfigSchema.safeParse(JSON.parse(raw))
+    if (!parsed.success) return null
+    return parsed.data
   } catch {
     return null
   }
 }
 
 export function saveConfig(config: DotplaneConfig): void {
+  const validated = ConfigSchema.parse(config)
   fs.mkdirSync(CONFIG_DIR, { mode: 0o700, recursive: true })
-  fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2) + '\n', { mode: 0o600 })
+  fs.writeFileSync(CONFIG_PATH, JSON.stringify(validated, null, 2) + '\n', { mode: 0o600 })
 }
 
 export function requireConfig(): DotplaneConfig {

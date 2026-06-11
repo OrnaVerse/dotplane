@@ -297,8 +297,14 @@ export class DeployService {
   }
 
   private getArtifactUrl(appId: string, version: string): string {
-    const port = process.env.PLATFORM_PORT ?? '58291'
     const urlKey = process.env.PLATFORM_URL_KEY ?? ''
+    const platformUrl = process.env.PLATFORM_URL
+
+    if (platformUrl) {
+      return `${platformUrl.replace(/\/$/, '')}/${urlKey}/api/artifacts/${appId}/${version}`
+    }
+
+    const port = process.env.PLATFORM_PORT ?? '58291'
     return `http://127.0.0.1:${port}/${urlKey}/api/artifacts/${appId}/${version}`
   }
 

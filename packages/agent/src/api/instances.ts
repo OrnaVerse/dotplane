@@ -1,5 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express'
+import { artifactDownloadHosts, platformAllowsPrivateFetch, validateUrl } from '@dotplane/shared'
 import { z } from 'zod'
+import { agentConfig } from '../config.js'
 import * as systemd from '../services/systemd.service.js'
 import * as deploy from '../services/deploy.service.js'
 import * as caddy from '../services/caddy.service.js'
@@ -32,6 +34,18 @@ const DeploySchema = z.object({
   artifactUrl: z.string().url(),
   appPath: z.string().min(1),
   uploadsPath: z.string().min(1),
+}).superRefine((data, ctx) => {
+  try {
+    validateUrl(data.artifactUrl, {
+      allowedHostnames: artifactDownloadHosts(agentConfig.platformUrl ?? undefined),
+      allowHttp: data.artifactUrl.startsWith('http://'),
+      allowPrivateHosts: platformAllowsPrivateFetch(agentConfig.platformUrl ?? undefined),
+      requireAllowlist: true,
+    })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Invalid artifact URL'
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: msg, path: ['artifactUrl'] })
+  }
 })
 
 const CaddyRouteSchema = z.object({

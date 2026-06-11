@@ -1,5 +1,6 @@
 import os from 'os'
 import { Router, type Request, type Response, type NextFunction } from 'express'
+import { platformAllowsPrivateFetch, safeFetch } from '@dotplane/shared'
 import { agentConfig } from '../config.js'
 import { logger } from '../logger.js'
 
@@ -22,20 +23,28 @@ export async function reportOnline(): Promise<void> {
     return
   }
 
-  const url = `${platformUrl.replace(/\/$/, '')}/api/internal/servers/${serverId}/agent-online`
+  const base = platformUrl.replace(/\/$/, '')
+  const url = `${base}/api/servers/internal/agent-online`
+  const platformHost = new URL(base).hostname
+  const allowPrivate = platformAllowsPrivateFetch(platformUrl)
 
   try {
-    const res = await fetch(url, {
+    const res = await safeFetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${agentCallbackToken}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        timestamp: new Date().toISOString(),
-        hostname: os.hostname(),
-        uptimeSeconds: Math.floor(process.uptime()),
+        token: agentCallbackToken,
+        osInfo: {
+          hostname: os.hostname(),
+          uptimeSeconds: String(Math.floor(process.uptime())),
+          reportedAt: new Date().toISOString(),
+        },
       }),
+    }, {
+      allowedHostnames: [platformHost],
+      allowHttp: base.startsWith('http://'),
+      allowPrivateHosts: allowPrivate,
+      requireAllowlist: true,
     })
 
     if (!res.ok) {

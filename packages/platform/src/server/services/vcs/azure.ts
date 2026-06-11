@@ -3,6 +3,7 @@ import path from 'path'
 import { pipeline } from 'stream/promises'
 import { createWriteStream } from 'fs'
 import type { VcsProvider, VcsRelease } from './interface.js'
+import { vcsFetch } from './http.js'
 
 interface AzureReleaseAsset {
   name: string
@@ -43,7 +44,7 @@ export class AzureVcsProvider implements VcsProvider {
 
   async downloadRelease(release: VcsRelease, destPath: string): Promise<string> {
     await fs.mkdir(path.dirname(destPath), { recursive: true })
-    const res = await fetch(release.downloadUrl, {
+    const res = await vcsFetch('azure', release.downloadUrl, {
       headers: { Authorization: `Basic ${Buffer.from(`:${this.token}`).toString('base64')}` },
     })
     if (!res.ok || !res.body) {
@@ -71,7 +72,7 @@ export class AzureVcsProvider implements VcsProvider {
   }
 
   private async fetchJson<T>(url: string): Promise<T> {
-    const res = await fetch(url, {
+    const res = await vcsFetch('azure', url, {
       headers: {
         Authorization: `Basic ${Buffer.from(`:${this.token}`).toString('base64')}`,
       },

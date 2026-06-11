@@ -5,6 +5,18 @@ declare global {
     interface Request {
       user?: JWTPayload
       deployTokenId?: number
+      agentInstall?: {
+        serverId: string
+        token: string
+        payload: {
+          token: string
+          totalMemory?: number
+          totalCpu?: number
+          diskTotal?: number
+          diskUsed?: number
+          osInfo?: Record<string, string>
+        }
+      }
     }
   }
 }

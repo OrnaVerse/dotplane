@@ -4,6 +4,8 @@ import path from 'path'
 import { createWriteStream } from 'fs'
 import { pipeline } from 'stream/promises'
 import unzipper from 'unzipper'
+import { artifactDownloadHosts, platformAllowsPrivateFetch, safeFetch } from '@dotplane/shared'
+import { agentConfig } from '../config.js'
 
 export const PROTECTED_PATTERNS = [
   /^uploads\//,
@@ -38,7 +40,15 @@ export async function deployArtifact(params: {
 }
 
 async function downloadFile(url: string, destPath: string): Promise<void> {
-  const res = await fetch(url)
+  const platformUrl = agentConfig.platformUrl
+  const allowPrivate = platformAllowsPrivateFetch(platformUrl ?? undefined)
+
+  const res = await safeFetch(url, undefined, {
+    allowedHostnames: artifactDownloadHosts(platformUrl ?? undefined),
+    allowHttp: url.startsWith('http://'),
+    allowPrivateHosts: allowPrivate,
+    requireAllowlist: true,
+  })
   if (!res.ok) throw new Error(`Download failed: ${res.status}`)
   if (!res.body) throw new Error('No response body')
 

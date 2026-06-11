@@ -8,8 +8,10 @@
     "dev": "tsx watch src/index.ts"
   },
   "dependencies": {
+    "@dotplane/shared": "workspace:*",
     "execa": "^9.5.2",
     "express": "^5.0.1",
+    "helmet": "^8.0.0",
     "pg": "^8.13.1",
     "pino": "^9.5.0",
     "unzipper": "^0.12.3",

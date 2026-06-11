@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import type { Request } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 import crypto from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
@@ -7,6 +7,7 @@ import forge from 'node-forge'
 import { z } from 'zod'
 import { eq, sql } from 'drizzle-orm'
 import { requireRole } from '../middleware/rbac.js'
+import { agentCallbackRateLimiter } from '../middleware/rateLimit.js'
 import {
   generateAgentServerCert,
   generateCaCert,
@@ -66,6 +67,23 @@ function createInstallToken(serverId: string): string {
     .run()
 
   return token
+}
+
+function agentInstallTokenAuth(req: Request, res: Response, next: NextFunction): void {
+  const body = AgentOnlineSchema.safeParse(req.body)
+  if (!body.success) {
+    res.status(400).json({ error: 'Invalid input' })
+    return
+  }
+
+  const serverId = resolveServerFromToken(body.data.token)
+  if (!serverId) {
+    res.status(401).json({ error: 'Invalid or expired token' })
+    return
+  }
+
+  req.agentInstall = { serverId, token: body.data.token, payload: body.data }
+  next()
 }
 
 function resolveServerFromToken(token: string): string | null {
@@ -145,38 +163,32 @@ echo "Run install-agent.sh with SERVER_ID=${serverId}"
 `)
 })
 
-router.post('/internal/agent-online', async (req, res) => {
-  const body = AgentOnlineSchema.safeParse(req.body)
-  if (!body.success) {
-    res.status(400).json({ error: 'Invalid input' })
-    return
-  }
+router.post(
+  '/internal/agent-online',
+  agentCallbackRateLimiter,
+  agentInstallTokenAuth,
+  async (req, res) => {
+    const { serverId, token, payload } = req.agentInstall!
+    const now = new Date().toISOString()
 
-  const serverId = resolveServerFromToken(body.data.token)
-  if (!serverId) {
-    res.status(401).json({ error: 'Invalid or expired token' })
-    return
-  }
+    db.update(servers)
+      .set({
+        status: 'online',
+        lastSeen: now,
+        totalMemory: payload.totalMemory ?? null,
+        totalCpu: payload.totalCpu ?? null,
+        diskTotal: payload.diskTotal ?? null,
+        diskUsed: payload.diskUsed ?? null,
+        osInfo: payload.osInfo ?? null,
+      })
+      .where(eq(servers.id, serverId))
+      .run()
 
-  const now = new Date().toISOString()
+    db.delete(settings).where(eq(settings.key, agentTokenSettingKey(token))).run()
 
-  db.update(servers)
-    .set({
-      status: 'online',
-      lastSeen: now,
-      totalMemory: body.data.totalMemory ?? null,
-      totalCpu: body.data.totalCpu ?? null,
-      diskTotal: body.data.diskTotal ?? null,
-      diskUsed: body.data.diskUsed ?? null,
-      osInfo: body.data.osInfo ?? null,
-    })
-    .where(eq(servers.id, serverId))
-    .run()
-
-  db.delete(settings).where(eq(settings.key, agentTokenSettingKey(body.data.token))).run()
-
-  res.json({ ok: true, serverId })
-})
+    res.json({ ok: true, serverId })
+  },
+)
 
 router.get('/health', async (_req, res) => {
   const allServers = db.select().from(servers).all()

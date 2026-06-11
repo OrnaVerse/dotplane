@@ -72,7 +72,7 @@ stages:
                   inputs:
                     versionSpec: '20.x'
                 - script: |
-                    npm install -g @dotplane/cli
+                    npm install -g @dotplane/cli@$(dotplaneVersion)
                     dotplane-remote login \
                       --url "$(dotplaneBaseUrl)" \
                       --url-key "$(dotplaneUrlKey)" \

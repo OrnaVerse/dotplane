@@ -56,6 +56,6 @@ export const agentConfig = {
   pgDatabase: process.env.PG_DATABASE ?? 'postgres',
   instancesRoot: process.env.INSTANCES_ROOT ?? '/var/dotplane/instances',
   certCheckPaths: (process.env.CERT_CHECK_PATHS ?? '/etc/caddy').split(',').map((p) => p.trim()),
-  fnmDir: process.env.FNM_DIR ?? '/root/.local/share/fnm',
+  fnmDir: process.env.FNM_DIR ?? '/usr/local/share/fnm',
   dotnetInstallDir: process.env.DOTNET_INSTALL_DIR ?? '/usr/share/dotnet',
 } as const

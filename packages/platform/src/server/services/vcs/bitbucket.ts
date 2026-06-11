@@ -3,6 +3,7 @@ import path from 'path'
 import { pipeline } from 'stream/promises'
 import { createWriteStream } from 'fs'
 import type { VcsProvider, VcsRelease } from './interface.js'
+import { vcsFetch } from './http.js'
 
 interface BitbucketDownloadLink {
   name: string
@@ -36,7 +37,7 @@ export class BitbucketVcsProvider implements VcsProvider {
 
   async downloadRelease(release: VcsRelease, destPath: string): Promise<string> {
     await fs.mkdir(path.dirname(destPath), { recursive: true })
-    const res = await fetch(release.downloadUrl, {
+    const res = await vcsFetch('bitbucket', release.downloadUrl, {
       headers: { Authorization: `Bearer ${this.token}` },
     })
     if (!res.ok || !res.body) {
@@ -59,7 +60,7 @@ export class BitbucketVcsProvider implements VcsProvider {
   }
 
   private async fetchJson<T>(url: string): Promise<T> {
-    const res = await fetch(url, {
+    const res = await vcsFetch('bitbucket', url, {
       headers: { Authorization: `Bearer ${this.token}` },
     })
     if (!res.ok) {

@@ -19,13 +19,13 @@ jobs:
             runner: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@a7487c7e125a348d1d048caaff661e0312b929a1 # v4.1.0
         with:
           version: 9
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@49933ea528805ca4aeafc93d6d9bfcdb677eabbb # v4.4.0
         with:
           node-version: 20
           cache: pnpm
@@ -42,7 +42,7 @@ jobs:
           ARCH=${{ matrix.arch }} bash scripts/package-release.sh "${GITHUB_REF_NAME}"
 
       - name: Upload release asset
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@c062e08bd6521085b23567911dad4868dc25d0df # v2.2.0
         with:
           files: |
             dist-releases/dotplane-${{ github.ref_name }}-linux-${{ matrix.arch }}.tar.gz
@@ -72,4 +72,4 @@ jobs:
 
             **Architecture:** linux-${{ matrix.arch }}
 
-            Native modules (`better-sqlite3`, `argon2`) are compiled on the target server during `pnpm install --prod`.
+            Native modules (`better-sqlite3`, `argon2`) are compiled on the target server during `pnpm install --frozen-lockfile --prod`.

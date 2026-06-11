@@ -3,6 +3,7 @@ import path from 'path'
 import { pipeline } from 'stream/promises'
 import { createWriteStream } from 'fs'
 import type { VcsProvider, VcsRelease } from './interface.js'
+import { vcsFetch } from './http.js'
 
 interface GithubReleaseAsset {
   name: string
@@ -42,7 +43,7 @@ export class GithubVcsProvider implements VcsProvider {
 
   async downloadRelease(release: VcsRelease, destPath: string): Promise<string> {
     await fs.mkdir(path.dirname(destPath), { recursive: true })
-    const res = await fetch(release.downloadUrl, {
+    const res = await vcsFetch('github', release.downloadUrl, {
       headers: { Authorization: `Bearer ${this.token}`, Accept: 'application/octet-stream' },
     })
     if (!res.ok || !res.body) {
@@ -66,7 +67,7 @@ export class GithubVcsProvider implements VcsProvider {
   }
 
   private async fetchJson<T>(url: string): Promise<T> {
-    const res = await fetch(url, {
+    const res = await vcsFetch('github', url, {
       headers: {
         Authorization: `Bearer ${this.token}`,
         Accept: 'application/vnd.github+json',

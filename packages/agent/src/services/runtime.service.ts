@@ -1,5 +1,5 @@
 import { execa } from 'execa'
-import { MEMORY_TIERS, MemoryTierName } from '../config.js'
+import { agentConfig, MEMORY_TIERS, MemoryTierName } from '../config.js'
 
 export type AppRuntime = 'dotnet' | 'node'
 
@@ -20,7 +20,7 @@ export function buildOverrideConf(params: OverrideConfParams): string {
     .join('\n')
 
   if (runtime === 'node') {
-    const fnmBin = '/root/.local/share/fnm/aliases/default/bin'
+    const fnmBin = `${agentConfig.fnmDir}/aliases/default/bin`
     return `
 [Service]
 Environment=PORT=${port}
@@ -67,7 +67,9 @@ async function listDotnetRuntimes(): Promise<string[]> {
 
 async function listNodeRuntimes(): Promise<string[]> {
   try {
-    const { stdout } = await execa('bash', ['-lc', 'fnm list --installed'])
+    const { stdout } = await execa('/usr/local/bin/fnm', ['list', '--installed'], {
+      env: { ...process.env, FNM_DIR: agentConfig.fnmDir },
+    })
     return stdout
       .split('\n')
       .map((line) => line.replace(/^\*\s*/, '').trim())
@@ -101,5 +103,10 @@ async function installDotnetRuntime(version: string): Promise<void> {
 }
 
 async function installNodeRuntime(version: string): Promise<void> {
-  await execa('bash', ['-lc', `fnm install ${version} && fnm default ${version}`])
+  await execa('/usr/local/bin/fnm', ['install', version], {
+    env: { ...process.env, FNM_DIR: agentConfig.fnmDir },
+  })
+  await execa('/usr/local/bin/fnm', ['default', version], {
+    env: { ...process.env, FNM_DIR: agentConfig.fnmDir },
+  })
 }
