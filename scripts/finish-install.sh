@@ -29,7 +29,9 @@ print_install_summary() {
     ip="$(curl -fsSL --max-time 5 https://api.ipify.org 2>/dev/null || hostname -I | awk '{print $1}')"
   fi
 
-  local panel_url="https://${ip}/${URL_KEY}"
+  local port="${PLATFORM_PORT:-}"
+  local panel_url="http://${ip}:${port}/${URL_KEY}"
+  local https_url="https://${ip}/${URL_KEY}"
   local pass_line
   if [[ "${GENERATED_ADMIN_PASS:-0}" == "1" ]]; then
     pass_line="${ADMIN_PASS}"
@@ -43,6 +45,9 @@ print_install_summary() {
   cat > "${access_file}" << EOF
 Dotplane access — save this file securely
 Panel URL: ${panel_url}
+HTTPS URL (Caddy): ${https_url}
+Port: ${port}
+URL key: ${URL_KEY}
 Username: admin
 Password: ${pass_line}
 EOF
@@ -53,6 +58,8 @@ EOF
   echo -e "${GREEN}║           Dotplane Installed Successfully            ║${NC}"
   echo -e "${GREEN}╠══════════════════════════════════════════════════════╣${NC}"
   echo -e "${GREEN}║${NC}  Panel URL  : ${panel_url}"
+  echo -e "${GREEN}║${NC}  HTTPS URL   : ${https_url} (Caddy, port 443)"
+  echo -e "${GREEN}║${NC}  Port        : ${port}"
   echo -e "${GREEN}║${NC}  URL key     : ${URL_KEY}"
   echo -e "${GREEN}║${NC}  Username   : admin"
   echo -e "${GREEN}║${NC}  Password   : ${pass_line}"

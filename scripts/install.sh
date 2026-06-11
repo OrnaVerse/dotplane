@@ -37,7 +37,9 @@ print_install_summary() {
     ip="$(curl -fsSL --max-time 5 https://api.ipify.org 2>/dev/null || hostname -I | awk '{print $1}')"
   fi
 
-  local panel_url="https://${ip}/${URL_KEY}"
+  local port="${PLATFORM_PORT:-}"
+  local panel_url="http://${ip}:${port}/${URL_KEY}"
+  local https_url="https://${ip}/${URL_KEY}"
   local pass_line
   if [[ "${GENERATED_ADMIN_PASS:-0}" == "1" ]]; then
     pass_line="${ADMIN_PASS}"
@@ -51,6 +53,9 @@ print_install_summary() {
   cat > "${ACCESS_FILE}" << EOF
 Dotplane access — save this file securely
 Panel URL: ${panel_url}
+HTTPS URL (Caddy): ${https_url}
+Port: ${port}
+URL key: ${URL_KEY}
 Username: admin
 Password: ${pass_line}
 EOF
@@ -61,6 +66,8 @@ EOF
   echo -e "${GREEN}║           Dotplane Installed Successfully            ║${NC}"
   echo -e "${GREEN}╠══════════════════════════════════════════════════════╣${NC}"
   echo -e "${GREEN}║${NC}  Panel URL  : ${panel_url}"
+  echo -e "${GREEN}║${NC}  HTTPS URL   : ${https_url} (Caddy, port 443)"
+  echo -e "${GREEN}║${NC}  Port        : ${port}"
   echo -e "${GREEN}║${NC}  URL key     : ${URL_KEY}"
   echo -e "${GREEN}║${NC}  Username   : admin"
   echo -e "${GREEN}║${NC}  Password   : ${pass_line}"
@@ -68,6 +75,7 @@ EOF
   echo -e "${GREEN}║${NC}  Backups    : ${BACKUP_DIR}"
   echo -e "${GREEN}║${NC}  Access file: ${ACCESS_FILE}"
   echo -e "${GREEN}║${NC}"
+  echo -e "${GREEN}║${NC}  Cloud VM? Open TCP ${port} in your provider firewall"
   echo -e "${GREEN}║${NC}  Save the URL — it won't be shown again"
   echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${NC}"
   SUMMARY_PRINTED=1
@@ -231,6 +239,7 @@ ok "fail2ban configured for SSH"
 # ── 7. Generate secrets ────────────────────────────────────────────────────────
 log "Generating secrets..."
 PLATFORM_PORT=$(shuf -i 49152-65535 -n 1)
+ufw allow "${PLATFORM_PORT}/tcp" >/dev/null 2>&1 || true
 URL_KEY="ov_$(openssl rand -hex 3)"
 JWT_SECRET=$(openssl rand -hex 64)
 REFRESH_SECRET=$(openssl rand -hex 64)
@@ -316,7 +325,7 @@ fi
 cat > "${DOTPLANE_ROOT}/.env" << EOF
 NODE_ENV=production
 PLATFORM_PORT=${PLATFORM_PORT}
-PLATFORM_HOST=127.0.0.1
+PLATFORM_HOST=0.0.0.0
 PLATFORM_URL_KEY=${URL_KEY}
 
 JWT_SECRET=${JWT_SECRET}
@@ -423,6 +432,10 @@ cat > /etc/caddy/Caddyfile << EOF
 {
     admin localhost:2019
     persist_config on
+}
+
+:80 {
+    reverse_proxy 127.0.0.1:${PLATFORM_PORT}
 }
 
 :443 {

@@ -45,7 +45,7 @@ Pin a specific version:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/OrnaVerse/dotplane/main/scripts/bootstrap-install.sh | \
-  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane DOTPLANE_VERSION=v0.1.11 DOTPLANE_ADMIN_PASSWORD='your-secure-password' bash
+  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane DOTPLANE_VERSION=v0.1.12 DOTPLANE_ADMIN_PASSWORD='your-secure-password' bash
 ```
 
 The bootstrap script downloads the pre-built release tarball, installs system dependencies (Node, Caddy, .NET, UFW, fail2ban), generates secrets, and starts services. Native modules compile on the target server during production dependency install.
@@ -155,9 +155,11 @@ sudo DOTPLANE_ADMIN_PASSWORD='your-secure-password' bash /opt/dotplane/scripts/f
 Recover the panel URL from an existing install:
 
 ```bash
-sudo grep PLATFORM_URL_KEY /opt/dotplane/.env
-curl -fsSL https://api.ipify.org   # your server IP → https://<IP>/<URL_KEY>
-sudo cat /opt/dotplane/access.txt  # written after successful password step (v0.1.11+)
+cd /opt/dotplane/packages/platform
+sudo DOTPLANE_ENV_PATH=/opt/dotplane/.env node dist/server/cli.js show-access
+# Or manually: http://<IP>:$(grep PLATFORM_PORT /opt/dotplane/.env | cut -d= -f2)/$(grep PLATFORM_URL_KEY /opt/dotplane/.env | cut -d= -f2)
 ```
+
+On cloud VMs (GCP, AWS, etc.), open the `PLATFORM_PORT` TCP port in your provider's firewall — UFW on the server is not enough.
 
 See `docs/security.md` for hardening and secret rotation.

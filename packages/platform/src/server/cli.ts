@@ -97,9 +97,14 @@ const commands: Record<string, () => Promise<void>> = {
   },
 
   'show-access': async () => {
-    const urlKey = process.env.PLATFORM_URL_KEY ?? (await readEnvFile()).PLATFORM_URL_KEY ?? ''
+    const env = await readEnvFile()
+    const urlKey = process.env.PLATFORM_URL_KEY ?? env.PLATFORM_URL_KEY ?? ''
+    const port = process.env.PLATFORM_PORT ?? env.PLATFORM_PORT ?? '58291'
     const ip = await getPublicIp()
-    console.log(`Panel URL: https://${anonymizeIp(ip)}/${urlKey}`)
+    console.log(`Panel URL: http://${anonymizeIp(ip)}:${port}/${urlKey}`)
+    console.log(`HTTPS URL: https://${anonymizeIp(ip)}/${urlKey} (Caddy, port 443)`)
+    console.log(`Port: ${port}`)
+    console.log(`URL key: ${urlKey}`)
   },
 
   backup: async () => {
