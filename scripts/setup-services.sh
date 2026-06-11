@@ -111,12 +111,32 @@ EOF
   chmod 644 /etc/cron.d/dotplane-backup
 fi
 
+if [[ ! -f /etc/systemd/system/caddy.service ]]; then
+  cat > /etc/systemd/system/caddy.service << 'EOF'
+[Unit]
+Description=Caddy
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/caddy run --config /etc/caddy/Caddyfile --resume
+ExecReload=/usr/local/bin/caddy reload --config /etc/caddy/Caddyfile
+Restart=on-failure
+User=caddy
+Group=caddy
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target
+EOF
+  ok "caddy.service unit written"
+fi
+
 log "Starting services..."
 systemctl daemon-reload
-systemctl enable dotplane
-systemctl enable caddy
-systemctl restart dotplane
-systemctl restart caddy
+systemctl enable dotplane 2>/dev/null || warn "Failed to enable dotplane"
+systemctl enable caddy 2>/dev/null || warn "Failed to enable caddy"
+systemctl restart dotplane 2>/dev/null || warn "dotplane failed to start — journalctl -u dotplane -n 50"
+systemctl restart caddy 2>/dev/null || warn "caddy failed to start — journalctl -u caddy -n 50"
 
 sleep 2
 if curl -fsS --max-time 3 "http://127.0.0.1:${PLATFORM_PORT}/${URL_KEY}/api/health" >/dev/null; then
@@ -131,13 +151,15 @@ else
   warn "Caddy proxy check failed — run: journalctl -u caddy -n 50 --no-pager"
 fi
 
-echo ""
-if [[ -f "${DOTPLANE_ROOT}/access.txt" ]]; then
-  ok "Credentials:"
-  cat "${DOTPLANE_ROOT}/access.txt"
-else
-  IP="$(curl -fsSL --max-time 5 https://api.ipify.org 2>/dev/null || hostname -I | awk '{print $1}')"
-  echo "Panel URL: http://${IP}:${PLATFORM_PORT}/${URL_KEY}"
-  echo "URL key: ${URL_KEY}"
-  echo "Username: ${PLATFORM_ADMIN_USERNAME:-see .env}"
+if [[ "${DOTPLANE_SETUP_QUIET:-0}" != "1" ]]; then
+  echo ""
+  if [[ -f "${DOTPLANE_ROOT}/access.txt" ]]; then
+    ok "Credentials:"
+    cat "${DOTPLANE_ROOT}/access.txt"
+  else
+    IP="$(curl -fsSL --max-time 5 https://api.ipify.org 2>/dev/null || hostname -I | awk '{print $1}')"
+    echo "Panel URL: http://${IP}:${PLATFORM_PORT}/${URL_KEY}"
+    echo "URL key: ${URL_KEY}"
+    echo "Username: ${PLATFORM_ADMIN_USERNAME:-see .env}"
+  fi
 fi

@@ -73,10 +73,23 @@ EXTRACTED="$(find "$TMP_DIR" -maxdepth 1 -type d -name 'dotplane-*' | head -1)"
   fail "Invalid release tarball — scripts/install.sh not found"
 
 log "Starting install..."
-# Piped curl|bash has no usable stdin — attach the controlling terminal so prompts
-# and the final access summary are always visible.
+# curl|bash closes the pipe when the download finishes — that SIGHUP kills installs
+# still running in the same session. setsid starts a new session so install continues.
+INSTALL_RC=0
 if [[ -r /dev/tty && -w /dev/tty ]]; then
-  exec bash "${EXTRACTED}/scripts/install.sh" --from-release "${EXTRACTED}" </dev/tty >/dev/tty 2>&1
+  setsid bash "${EXTRACTED}/scripts/install.sh" --from-release "${EXTRACTED}" </dev/tty >/dev/tty 2>&1 \
+    || INSTALL_RC=$?
 else
-  exec bash "${EXTRACTED}/scripts/install.sh" --from-release "${EXTRACTED}"
+  setsid bash "${EXTRACTED}/scripts/install.sh" --from-release "${EXTRACTED}" \
+    || INSTALL_RC=$?
 fi
+
+# Fallback when install is interrupted after files are deployed but before systemd setup
+SETUP_SCRIPT="/opt/dotplane/scripts/setup-services.sh"
+[[ -f "$SETUP_SCRIPT" ]] || SETUP_SCRIPT="${EXTRACTED}/scripts/setup-services.sh"
+if [[ ! -f /etc/systemd/system/dotplane.service && -f "$SETUP_SCRIPT" ]]; then
+  log "Install stopped before systemd setup — running setup-services..."
+  bash "$SETUP_SCRIPT" || INSTALL_RC=$?
+fi
+
+exit "$INSTALL_RC"

@@ -368,7 +368,12 @@ else
 fi
 ok "SQLite database ready at ${DATA_DIR}/dotplane.db"
 
-# ── 13. Set admin credentials ──────────────────────────────────────────────────
+# ── 13. Start systemd + Caddy (before credentials — survives curl|bash SIGHUP) ─
+log "Installing and starting services..."
+DOTPLANE_SETUP_QUIET=1 bash "${DOTPLANE_ROOT}/scripts/setup-services.sh" \
+  || warn "setup-services failed — run: bash ${DOTPLANE_ROOT}/scripts/setup-services.sh"
+
+# ── 14. Set admin credentials ──────────────────────────────────────────────────
 CLI="${DOTPLANE_ROOT}/packages/platform/dist/server/cli.js"
 if [[ -f "$CLI" ]]; then
   if ! DOTPLANE_ENV_PATH="${DOTPLANE_ROOT}/.env" DB_PATH="${DATA_DIR}/dotplane.db" \
@@ -381,110 +386,7 @@ else
   warn "Platform CLI not found — set admin credentials via UI on first login"
 fi
 
-# ── 14. Install systemd units ──────────────────────────────────────────────────
-log "Installing systemd units..."
-PLATFORM_ENTRY="${DOTPLANE_ROOT}/packages/platform/dist/server/index.js"
-
-cat > /etc/systemd/system/dotplane.service << EOF
-[Unit]
-Description=Dotplane Platform
-After=network.target
-
-[Service]
-Type=simple
-WorkingDirectory=${DOTPLANE_ROOT}/packages/platform
-ExecStart=${NODE_BIN} ${PLATFORM_ENTRY}
-Restart=always
-RestartSec=5
-User=root
-EnvironmentFile=${DOTPLANE_ROOT}/.env
-Environment=PATH=/usr/local/bin:/usr/share/dotnet:/usr/bin:/bin
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-cp "${DOTPLANE_ROOT}/systemd/dotnet-app@.service" /etc/systemd/system/
-ok "systemd units installed"
-
-# ── 15. Write Caddyfile ────────────────────────────────────────────────────────
-SERVER_IP="$(curl -fsSL --max-time 5 https://api.ipify.org 2>/dev/null || hostname -I | awk '{print $1}')"
-cat > /etc/caddy/Caddyfile << EOF
-{
-    admin localhost:2019
-    persist_config on
-}
-
-:80 {
-    reverse_proxy 127.0.0.1:${PLATFORM_PORT}
-}
-
-:443 {
-    tls internal
-    reverse_proxy 127.0.0.1:${PLATFORM_PORT}
-}
-EOF
-
-# ── 16. Daily backup cron ──────────────────────────────────────────────────────
-log "Installing daily backup cron..."
-cat > /etc/cron.d/dotplane-backup << EOF
-# Dotplane SQLite backup — daily at 02:00 UTC
-0 2 * * * root ${NODE_BIN} -e "
-const Database = require('better-sqlite3');
-const fs = require('fs');
-const path = require('path');
-const src = '${DATA_DIR}/dotplane.db';
-const dir = '${BACKUP_DIR}';
-const ts = new Date().toISOString().replace(/[:.]/g, '-');
-const dest = path.join(dir, 'dotplane-' + ts + '.db');
-fs.mkdirSync(dir, { recursive: true });
-Database(src).backup(dest);
-const files = fs.readdirSync(dir).filter(f => f.endsWith('.db')).sort().reverse();
-files.slice(30).forEach(f => fs.unlinkSync(path.join(dir, f)));
-" >> ${LOG_DIR}/backup.log 2>&1
-EOF
-chmod 644 /etc/cron.d/dotplane-backup
-ok "Backup cron installed (daily 02:00, 30-day retention)"
-
-# ── 17. Start services ─────────────────────────────────────────────────────────
-wait_for_platform_health() {
-  local url="http://127.0.0.1:${PLATFORM_PORT}/${URL_KEY}/api/health"
-  for _ in $(seq 1 30); do
-    if curl -fsS --max-time 2 "$url" >/dev/null 2>&1; then
-      ok "Platform health check passed (${url})"
-      return 0
-    fi
-    sleep 1
-  done
-  warn "Platform not responding — check: journalctl -u dotplane -n 100 --no-pager"
-  return 1
-}
-
-verify_caddy_proxy() {
-  local url="http://127.0.0.1:80/${URL_KEY}/api/health"
-  if curl -fsS --max-time 2 "$url" >/dev/null 2>&1; then
-    ok "Caddy HTTP proxy check passed"
-    return 0
-  fi
-  warn "Caddy HTTP proxy failed — check: journalctl -u caddy -n 50 --no-pager"
-  return 1
-}
-
-systemctl daemon-reload
-systemctl enable dotplane 2>/dev/null || warn "Failed to enable dotplane service"
-systemctl enable caddy 2>/dev/null || warn "Failed to enable caddy service"
-if ! systemctl restart dotplane; then
-  warn "dotplane failed to start — check: journalctl -u dotplane -n 50 --no-pager"
-else
-  wait_for_platform_health || true
-fi
-if ! systemctl restart caddy; then
-  warn "caddy failed to start — check: journalctl -u caddy -n 50 --no-pager"
-else
-  verify_caddy_proxy || true
-fi
-
-# ── 18. Install local agent ────────────────────────────────────────────────────
+# ── 15. Install local agent ────────────────────────────────────────────────────
 log "Installing Agent on this server..."
 if [[ -f "$CLI" ]]; then
   DOTPLANE_ENV_PATH="${DOTPLANE_ROOT}/.env" DB_PATH="${DATA_DIR}/dotplane.db" \
@@ -493,5 +395,5 @@ else
   warn "Register this server via the Platform UI after first login"
 fi
 
-# ── 19. Done (summary printed after password; EXIT trap is a fallback) ─────────
+# ── 16. Done ───────────────────────────────────────────────────────────────────
 print_install_summary

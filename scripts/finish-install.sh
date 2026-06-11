@@ -123,75 +123,8 @@ else
   ok "Admin credentials configured"
 fi
 
-print_install_summary
-
-log "Installing systemd units..."
-PLATFORM_ENTRY="${DOTPLANE_ROOT}/packages/platform/dist/server/index.js"
-cat > /etc/systemd/system/dotplane.service << EOF
-[Unit]
-Description=Dotplane Platform
-After=network.target
-
-[Service]
-Type=simple
-WorkingDirectory=${DOTPLANE_ROOT}/packages/platform
-ExecStart=${NODE_BIN} ${PLATFORM_ENTRY}
-Restart=always
-RestartSec=5
-User=root
-EnvironmentFile=${DOTPLANE_ROOT}/.env
-Environment=PATH=/usr/local/bin:/usr/share/dotnet:/usr/bin:/bin
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-cp "${DOTPLANE_ROOT}/systemd/dotnet-app@.service" /etc/systemd/system/
-ok "systemd units installed"
-
-SERVER_IP="$(curl -fsSL --max-time 5 https://api.ipify.org 2>/dev/null || hostname -I | awk '{print $1}')"
-cat > /etc/caddy/Caddyfile << EOF
-{
-    admin localhost:2019
-    persist_config on
-}
-
-:80 {
-    reverse_proxy 127.0.0.1:${PLATFORM_PORT}
-}
-
-:443 {
-    tls internal
-    reverse_proxy 127.0.0.1:${PLATFORM_PORT}
-}
-EOF
-ok "Caddy configured for port ${PLATFORM_PORT}"
-
-log "Installing daily backup cron..."
-cat > /etc/cron.d/dotplane-backup << EOF
-# Dotplane SQLite backup — daily at 02:00 UTC
-0 2 * * * root ${NODE_BIN} -e "
-const Database = require('better-sqlite3');
-const fs = require('fs');
-const path = require('path');
-const src = '${DATA_DIR}/dotplane.db';
-const dir = '${BACKUP_DIR}';
-const ts = new Date().toISOString().replace(/[:.]/g, '-');
-const dest = path.join(dir, 'dotplane-' + ts + '.db');
-fs.mkdirSync(dir, { recursive: true });
-Database(src).backup(dest);
-const files = fs.readdirSync(dir).filter(f => f.endsWith('.db')).sort().reverse();
-files.slice(30).forEach(f => fs.unlinkSync(path.join(dir, f)));
-" >> ${LOG_DIR}/backup.log 2>&1
-EOF
-chmod 644 /etc/cron.d/dotplane-backup
-
-systemctl daemon-reload
-systemctl enable dotplane 2>/dev/null || warn "Failed to enable dotplane service"
-systemctl enable caddy 2>/dev/null || warn "Failed to enable caddy service"
-systemctl restart dotplane 2>/dev/null || warn "dotplane failed to start — check: journalctl -u dotplane -n 50"
-systemctl restart caddy 2>/dev/null || warn "caddy failed to start — check: journalctl -u caddy -n 50"
-ok "Services started"
+DOTPLANE_SETUP_QUIET=1 bash "${DOTPLANE_ROOT}/scripts/setup-services.sh" \
+  || warn "setup-services failed — run: bash ${DOTPLANE_ROOT}/scripts/setup-services.sh"
 
 DOTPLANE_ENV_PATH="$ENV_FILE" DB_PATH="${DB_PATH}" \
   "$NODE_BIN" "$CLI" install-local-agent 2>/dev/null || warn "install-local-agent skipped"
