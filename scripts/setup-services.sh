@@ -114,7 +114,29 @@ if ! id caddy >/dev/null 2>&1; then
 fi
 chown -R caddy:caddy /var/lib/caddy 2>/dev/null || true
 
-cat > /etc/caddy/Caddyfile << EOF
+DOMAIN="${DOTPLANE_DOMAIN:-}"
+
+if [[ -n "$DOMAIN" ]]; then
+  # Real domain: Caddy auto-provisions a Let's Encrypt certificate.
+  # Port 80 must be reachable for the ACME HTTP-01 challenge.
+  log "Configuring Caddy with domain ${DOMAIN} (Let's Encrypt)..."
+  cat > /etc/caddy/Caddyfile << EOF
+{
+    admin localhost:2019
+}
+
+${DOMAIN} {
+    reverse_proxy 127.0.0.1:${PLATFORM_PORT}
+    header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+}
+EOF
+  ok "Caddyfile written for domain ${DOMAIN}"
+else
+  # IP-only: use Caddy's internal CA (self-signed). Browsers will show a
+  # "Your connection is not private" warning — click Advanced → Proceed.
+  # HTTP on port 80 works without any warning.
+  log "No DOTPLANE_DOMAIN set — using self-signed TLS (tls internal)..."
+  cat > /etc/caddy/Caddyfile << EOF
 {
     admin localhost:2019
 }
@@ -129,7 +151,8 @@ cat > /etc/caddy/Caddyfile << EOF
     header Strict-Transport-Security "max-age=31536000; includeSubDomains"
 }
 EOF
-ok "Caddyfile written for platform port ${PLATFORM_PORT}"
+  ok "Caddyfile written (self-signed TLS — HTTP on port 80 is the recommended access method)"
+fi
 
 if [[ ! -f /etc/cron.d/dotplane-backup ]]; then
   log "Installing backup cron..."

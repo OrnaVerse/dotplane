@@ -51,7 +51,12 @@ print_install_summary() {
 
   local port="${PLATFORM_PORT:-}"
   local panel_url="http://${ip}:${port}/${URL_KEY}"
-  local https_url="https://${ip}/${URL_KEY}"
+  local https_url
+  if [[ -n "${DOMAIN:-}" ]]; then
+    https_url="https://${DOMAIN}/${URL_KEY} (Let's Encrypt)"
+  else
+    https_url="https://${ip}/${URL_KEY} (self-signed — accept browser warning)"
+  fi
   ACCESS_FILE="${DOTPLANE_ROOT}/access.txt"
   if mkdir -p "${DOTPLANE_ROOT}" 2>/dev/null; then
     cat > "${ACCESS_FILE}" << EOF
@@ -73,7 +78,7 @@ EOF
   echo -e "${GREEN}║           Dotplane Installed Successfully            ║${NC}"
   echo -e "${GREEN}╠══════════════════════════════════════════════════════╣${NC}"
   echo -e "${GREEN}║${NC}  Panel URL  : ${panel_url}"
-  echo -e "${GREEN}║${NC}  HTTPS URL   : ${https_url} (Caddy, port 443)"
+  echo -e "${GREEN}║${NC}  HTTPS URL   : ${https_url}"
   echo -e "${GREEN}║${NC}  Port        : ${port}"
   echo -e "${GREEN}║${NC}  URL key     : ${URL_KEY}"
   echo -e "${GREEN}║${NC}  Username   : ${ADMIN_USER}"
@@ -283,6 +288,8 @@ else
   ADMIN_PASS="$(generate_dotplane_admin_password)"
 fi
 
+DOMAIN="${DOTPLANE_DOMAIN:-}"
+
 # ── 8. Directories + write .env FIRST (before rsync/deps/certs) ────────────────
 # .env must exist before any step that can fail, so that finish-install.sh and
 # setup-services.sh can resume from a partial install without a full re-run.
@@ -298,6 +305,7 @@ PLATFORM_PORT=${PLATFORM_PORT}
 PLATFORM_HOST=0.0.0.0
 PLATFORM_URL_KEY=${URL_KEY}
 PLATFORM_ADMIN_USERNAME=${ADMIN_USER}
+${DOMAIN:+DOTPLANE_DOMAIN=${DOMAIN}}
 
 JWT_SECRET=${JWT_SECRET}
 REFRESH_SECRET=${REFRESH_SECRET}
