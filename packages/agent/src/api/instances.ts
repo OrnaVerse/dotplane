@@ -7,7 +7,7 @@ import { MEMORY_TIERS } from '../config.js'
 import type { MemoryTierName } from '../config.js'
 import { requireParam } from '../utils/params.js'
 
-const router = Router()
+const router: Router = Router()
 
 type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>
 

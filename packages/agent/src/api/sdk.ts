@@ -2,7 +2,7 @@ import { Router, type Request, type Response, type NextFunction } from 'express'
 import { z } from 'zod'
 import * as sdk from '../services/sdk.service.js'
 
-const router = Router()
+const router: Router = Router()
 
 type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>
 

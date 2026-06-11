@@ -4,7 +4,7 @@ import { execa } from 'execa'
 import { Router, type Request, type Response, type NextFunction } from 'express'
 import { agentConfig } from '../config.js'
 
-const router = Router()
+const router: Router = Router()
 
 type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>
 

@@ -3,7 +3,7 @@ import { Router, type Request, type Response, type NextFunction } from 'express'
 import { agentConfig } from '../config.js'
 import { logger } from '../logger.js'
 
-const router = Router()
+const router: Router = Router()
 const startedAt = Date.now()
 
 type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>

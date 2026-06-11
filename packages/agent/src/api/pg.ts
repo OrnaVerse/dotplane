@@ -1,7 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express'
 import * as pgService from '../services/pg.service.js'
 
-const router = Router()
+const router: Router = Router()
 
 type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>
 

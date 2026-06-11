@@ -3,7 +3,7 @@ import { z } from 'zod'
 import * as firewall from '../services/firewall.service.js'
 import { requireParam } from '../utils/params.js'
 
-const router = Router()
+const router: Router = Router()
 
 type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>
 

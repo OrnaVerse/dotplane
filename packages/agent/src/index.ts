@@ -1,6 +1,6 @@
 import https from 'https'
 import fs from 'fs'
-import express, { type Request, type Response, type NextFunction } from 'express'
+import express, { type Express, type Request, type Response, type NextFunction } from 'express'
 import instanceRoutes from './api/instances.js'
 import sdkRoutes from './api/sdk.js'
 import runtimeRoutes from './api/runtime.js'
@@ -13,7 +13,7 @@ import { agentConfig } from './config.js'
 import { logger } from './logger.js'
 import { ZodError } from 'zod'
 
-const app = express()
+const app: Express = express()
 app.use(express.json())
 
 app.use('/instances', instanceRoutes)
