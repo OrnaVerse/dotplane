@@ -55,3 +55,7 @@ install_dotplane_node() {
   fi
   export NODE_BIN
 }
+
+generate_dotplane_admin_password() {
+  tr -dc 'A-Za-z0-9' </dev/urandom | head -c 12
+}

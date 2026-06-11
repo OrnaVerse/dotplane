@@ -36,16 +36,16 @@ Push a version tag to trigger the release workflow, then on your Linux server:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/OrnaVerse/dotplane/main/scripts/bootstrap-install.sh | \
-  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane DOTPLANE_ADMIN_PASSWORD='your-secure-password' bash
+  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane bash
 ```
 
-`DOTPLANE_ADMIN_PASSWORD` is required when piping through `curl` (no TTY). Without it, the installer generates a random password and prints it in the final summary.
+The installer auto-generates a random 12-character admin password and prints it in the final summary (also saved to `/opt/dotplane/access.txt`). Override with `DOTPLANE_ADMIN_PASSWORD='your-secure-password'` if needed.
 
 Pin a specific version:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/OrnaVerse/dotplane/main/scripts/bootstrap-install.sh | \
-  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane DOTPLANE_VERSION=v0.1.12 DOTPLANE_ADMIN_PASSWORD='your-secure-password' bash
+  sudo DOTPLANE_GITHUB_REPO=OrnaVerse/dotplane DOTPLANE_VERSION=v0.1.13 bash
 ```
 
 The bootstrap script downloads the pre-built release tarball, installs system dependencies (Node, Caddy, .NET, UFW, fail2ban), generates secrets, and starts services. Native modules compile on the target server during production dependency install.
@@ -149,7 +149,7 @@ node /opt/dotplane/packages/platform/dist/server/cli.js show-access
 If a piped install stopped before showing credentials:
 
 ```bash
-sudo DOTPLANE_ADMIN_PASSWORD='your-secure-password' bash /opt/dotplane/scripts/finish-install.sh
+sudo bash /opt/dotplane/scripts/finish-install.sh
 ```
 
 Recover the panel URL from an existing install:

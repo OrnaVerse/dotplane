@@ -32,15 +32,6 @@ print_install_summary() {
   local port="${PLATFORM_PORT:-}"
   local panel_url="http://${ip}:${port}/${URL_KEY}"
   local https_url="https://${ip}/${URL_KEY}"
-  local pass_line
-  if [[ "${GENERATED_ADMIN_PASS:-0}" == "1" ]]; then
-    pass_line="${ADMIN_PASS}"
-  elif [[ -n "${DOTPLANE_ADMIN_PASSWORD:-}" ]]; then
-    pass_line="(from DOTPLANE_ADMIN_PASSWORD)"
-  else
-    pass_line="(the one you just set)"
-  fi
-
   local access_file="${DOTPLANE_ROOT}/access.txt"
   cat > "${access_file}" << EOF
 Dotplane access — save this file securely
@@ -49,7 +40,7 @@ HTTPS URL (Caddy): ${https_url}
 Port: ${port}
 URL key: ${URL_KEY}
 Username: admin
-Password: ${pass_line}
+Password: ${ADMIN_PASS}
 EOF
   chmod 600 "${access_file}"
 
@@ -62,7 +53,7 @@ EOF
   echo -e "${GREEN}║${NC}  Port        : ${port}"
   echo -e "${GREEN}║${NC}  URL key     : ${URL_KEY}"
   echo -e "${GREEN}║${NC}  Username   : admin"
-  echo -e "${GREEN}║${NC}  Password   : ${pass_line}"
+  echo -e "${GREEN}║${NC}  Password   : ${ADMIN_PASS}"
   echo -e "${GREEN}║${NC}  Access file: ${access_file}"
   echo -e "${GREEN}║${NC}"
   echo -e "${GREEN}║${NC}  Save the URL — it won't be shown again"
@@ -96,31 +87,6 @@ export PATH="$(dirname "$NODE_BIN"):/usr/local/bin:/usr/share/dotnet:/usr/bin:/b
 CLI="${DOTPLANE_ROOT}/packages/platform/dist/server/cli.js"
 [[ -f "$CLI" ]] || fail "Platform CLI not found at ${CLI}"
 
-prompt_admin_password() {
-  if [[ -n "${DOTPLANE_ADMIN_PASSWORD:-}" ]]; then
-    ADMIN_PASS="$DOTPLANE_ADMIN_PASSWORD"
-    ok "Using admin password from DOTPLANE_ADMIN_PASSWORD"
-    return
-  fi
-
-  echo ""
-  if [[ -t 0 ]]; then
-    read -r -s -p "Set admin password (min 12 chars): " ADMIN_PASS
-    echo ""
-  elif [[ -r /dev/tty ]]; then
-    read -r -s -p "Set admin password (min 12 chars): " ADMIN_PASS < /dev/tty
-    echo "" > /dev/tty
-  else
-    ADMIN_PASS="$(openssl rand -base64 24)"
-    GENERATED_ADMIN_PASS=1
-    warn "No TTY — generated a random admin password (shown in summary below)"
-  fi
-
-  [[ ${#ADMIN_PASS} -lt 12 ]] && fail "Password too short (minimum 12 characters)"
-}
-
-GENERATED_ADMIN_PASS=0
-
 mkdir -p "$DATA_DIR" "$BACKUP_DIR"
 chmod 700 "$DATA_DIR" "$BACKUP_DIR"
 
@@ -132,7 +98,14 @@ export DB_PATH="${DB_PATH:-${DATA_DIR}/dotplane.db}"
   || "$NODE_BIN" --input-type=module -e "import('./dist/server/db/migrate.js').then((m) => { m.runMigrations(); console.log('Migrations complete') })"
 ok "Database migrations complete"
 
-prompt_admin_password
+if [[ -n "${DOTPLANE_ADMIN_PASSWORD:-}" ]]; then
+  ADMIN_PASS="$DOTPLANE_ADMIN_PASSWORD"
+  ok "Using admin password from DOTPLANE_ADMIN_PASSWORD"
+else
+  ADMIN_PASS="$(generate_dotplane_admin_password)"
+  ok "Generated random 12-character admin password (shown in summary below)"
+fi
+
 if ! DOTPLANE_ENV_PATH="$ENV_FILE" DB_PATH="${DB_PATH}" \
   "$NODE_BIN" "$CLI" set-password admin "$ADMIN_PASS"; then
   warn "Failed to set admin password — run: node ${CLI} set-password admin '...'"

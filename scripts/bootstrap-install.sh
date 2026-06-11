@@ -1,9 +1,9 @@
 #!/bin/bash
 # Dotplane one-line bootstrap installer.
 #
-# Install latest release (set admin password for piped/curl installs):
+# Install latest release (auto-generates a 12-char admin password; override optionally):
 #   curl -fsSL https://raw.githubusercontent.com/YOUR_ORG/dotplane/main/scripts/bootstrap-install.sh | \
-#     sudo DOTPLANE_GITHUB_REPO=YOUR_ORG/dotplane DOTPLANE_ADMIN_PASSWORD='your-secure-password' bash
+#     sudo DOTPLANE_GITHUB_REPO=YOUR_ORG/dotplane bash
 #
 # Install specific version:
 #   curl -fsSL ... | sudo DOTPLANE_GITHUB_REPO=YOUR_ORG/dotplane DOTPLANE_VERSION=v1.0.0 bash

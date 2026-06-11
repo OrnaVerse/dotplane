@@ -40,15 +40,6 @@ print_install_summary() {
   local port="${PLATFORM_PORT:-}"
   local panel_url="http://${ip}:${port}/${URL_KEY}"
   local https_url="https://${ip}/${URL_KEY}"
-  local pass_line
-  if [[ "${GENERATED_ADMIN_PASS:-0}" == "1" ]]; then
-    pass_line="${ADMIN_PASS}"
-  elif [[ -n "${DOTPLANE_ADMIN_PASSWORD:-}" ]]; then
-    pass_line="(from DOTPLANE_ADMIN_PASSWORD)"
-  else
-    pass_line="(the one you just set)"
-  fi
-
   ACCESS_FILE="${DOTPLANE_ROOT}/access.txt"
   cat > "${ACCESS_FILE}" << EOF
 Dotplane access — save this file securely
@@ -57,7 +48,7 @@ HTTPS URL (Caddy): ${https_url}
 Port: ${port}
 URL key: ${URL_KEY}
 Username: admin
-Password: ${pass_line}
+Password: ${ADMIN_PASS}
 EOF
   chmod 600 "${ACCESS_FILE}"
 
@@ -70,7 +61,7 @@ EOF
   echo -e "${GREEN}║${NC}  Port        : ${port}"
   echo -e "${GREEN}║${NC}  URL key     : ${URL_KEY}"
   echo -e "${GREEN}║${NC}  Username   : admin"
-  echo -e "${GREEN}║${NC}  Password   : ${pass_line}"
+  echo -e "${GREEN}║${NC}  Password   : ${ADMIN_PASS}"
   echo -e "${GREEN}║${NC}  Database   : ${DATA_DIR}/dotplane.db (SQLite)"
   echo -e "${GREEN}║${NC}  Backups    : ${BACKUP_DIR}"
   echo -e "${GREEN}║${NC}  Access file: ${ACCESS_FILE}"
@@ -360,31 +351,13 @@ fi
 ok "SQLite database ready at ${DATA_DIR}/dotplane.db"
 
 # ── 13. Set admin password ─────────────────────────────────────────────────────
-prompt_admin_password() {
-  if [[ -n "${DOTPLANE_ADMIN_PASSWORD:-}" ]]; then
-    ADMIN_PASS="$DOTPLANE_ADMIN_PASSWORD"
-    ok "Using admin password from DOTPLANE_ADMIN_PASSWORD"
-    return
-  fi
-
-  echo ""
-  if [[ -t 0 ]]; then
-    read -r -s -p "Set admin password (min 12 chars): " ADMIN_PASS
-    echo ""
-  elif [[ -r /dev/tty ]]; then
-    read -r -s -p "Set admin password (min 12 chars): " ADMIN_PASS < /dev/tty
-    echo "" > /dev/tty
-  else
-    ADMIN_PASS="$(openssl rand -base64 24)"
-    GENERATED_ADMIN_PASS=1
-    warn "Piped install with no TTY — generated a random admin password (shown in summary below)"
-  fi
-
-  [[ ${#ADMIN_PASS} -lt 12 ]] && fail "Password too short (minimum 12 characters)"
-}
-
-GENERATED_ADMIN_PASS=0
-prompt_admin_password
+if [[ -n "${DOTPLANE_ADMIN_PASSWORD:-}" ]]; then
+  ADMIN_PASS="$DOTPLANE_ADMIN_PASSWORD"
+  ok "Using admin password from DOTPLANE_ADMIN_PASSWORD"
+else
+  ADMIN_PASS="$(generate_dotplane_admin_password)"
+  ok "Generated random 12-character admin password (shown in summary below)"
+fi
 
 CLI="${DOTPLANE_ROOT}/packages/platform/dist/server/cli.js"
 if [[ -f "$CLI" ]]; then
